@@ -34,13 +34,21 @@ Route::prefix('song')->group(function(){
     });
 });
 
-Route::prefix('artist')->group(function(){
-    Route::name('artist.index')->get('/', [ArtistController::class, 'index']);
+Route::resource('artist', ArtistController::class);
 
-    Route::name('artist.insert')->get('insert/{name}', function($name){
-        $newArtist = new Artist();
-        $newArtist->name = $name;
-        $newArtist->save();
-        return $newArtist;
-    });
-});
+// Route::prefix('artist')->group(function(){
+//     Route::name('artist.index')->get('/', [ArtistController::class, 'index']);
+
+//     Route::name('artist.create')->get('create', function($name){
+//         $newArtist = new Artist();
+//         $newArtist->name = $name;
+//         $newArtist->save();
+//         return $newArtist;
+//     });
+
+//     Route::name('artist.store')->post('create', [ArtistController::class, 'store']);
+
+//     Route::name('artist.edit')->get('{artist}', [ArtistController::class, 'edit']);
+
+//     Route::name('artist.update')->put
+// });
