@@ -14,7 +14,7 @@ class ArtistController extends Controller
     */
     public function index()
     {
-        $artists = Artist::inRandomOrder()->with('songs')->first();
+        $artists = Artist::with('songs')->get();
         return $artists;
         return view('song.index', ['songs' => $songs]);
     }
@@ -26,7 +26,7 @@ class ArtistController extends Controller
         */
     public function create()
     {
-        //
+        return view('artists.create');
     }
 
     /**
@@ -34,9 +34,17 @@ class ArtistController extends Controller
         *
         * @return Response
         */
-    public function store()
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:artists|max:255',
+        ]);
+
+        $newArtist = new Artist();
+        $newArtist->name = $request->name;
+        $newArtist->save();
+
+        return redirect(route('artist.index'));
     }
 
     /**
