@@ -14,9 +14,8 @@ class ArtistController extends Controller
     */
     public function index()
     {
-        $artists = Artist::with('songs')->get();
-        return $artists;
-        return view('song.index', ['songs' => $songs]);
+        $artists = Artist::all();
+        return view('artists.index', ['artists' => $artists]);
     }
 
     /**
@@ -37,7 +36,7 @@ class ArtistController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|unique:artists|max:255',
+            'name' => 'required|unique:artists,name|max:255',
         ]);
 
         $newArtist = new Artist();
@@ -50,44 +49,55 @@ class ArtistController extends Controller
     /**
         * Display the specified resource.
         *
-        * @param  int  $id
+        * @param  Artist $artist
         * @return Response
         */
-    public function show($id)
+    public function show(Artist $artist)
     {
         //
+        $artist->load('songs');
+        return view('artists.show', ['artist' => $artist]);
     }
 
     /**
         * Show the form for editing the specified resource.
         *
-        * @param  int  $id
+        * @param  Artist $artist
         * @return Response
         */
-    public function edit($id)
+    public function edit(Artist $artist)
     {
-        //
+        return view('artists.edit', ['artist' => $artist]);
     }
 
     /**
         * Update the specified resource in storage.
         *
-        * @param  int  $id
+        * @param  Artist $artist
+        * @param  Request $request
         * @return Response
         */
-    public function update($id)
+    public function update(Artist $artist, Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:artists,name,'.$artist->id.'|max:255',
+        ]);
+        $artist->name =$request->name;
+        $artist->save();
+
+        return redirect(route('artist.index'));
     }
 
     /**
         * Remove the specified resource from storage.
         *
-        * @param  int  $id
+        * @param  Artist $artist
         * @return Response
         */
-    public function destroy($id)
+    public function destroy(Artist $artist)
     {
-        //
+        $artist->delete();
+        
+        return redirect(route('artist.index'));
     }
 }

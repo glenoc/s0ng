@@ -21,18 +21,20 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('song')->group(function(){
-    Route::name('song.index')->get('/', [SongController::class, 'index']);
+// Route::prefix('song')->group(function(){
+//     Route::name('song.index')->get('/', [SongController::class, 'index']);
 
-    Route::name('song.insert')->get('insert/{name}', function($name){
-        $newSong = new Song();
-        $newSong->name = $name;
-        $newSong->artist_id = Artist::inRandomOrder()->first()->id;
-        $newSong->text = "TEST";
-        $newSong->save();
-        return $name;
-    });
-});
+//     Route::name('song.insert')->get('insert/{name}', function($name){
+//         $newSong = new Song();
+//         $newSong->name = $name;
+//         $newSong->artist_id = Artist::inRandomOrder()->first()->id;
+//         $newSong->text = "TEST";
+//         $newSong->save();
+//         return $name;
+//     });
+// });
+
+Route::resource('song', SongController::class);
 
 Route::resource('artist', ArtistController::class);
 
