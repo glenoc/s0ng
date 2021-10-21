@@ -1,5 +1,5 @@
 <ul>
 @foreach ($songs as $song)
-<li>{{$song->name}} - {{$song->artist->name??''}}</li>
+<li><a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a></li>
 @endforeach
 </ul>
