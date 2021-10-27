@@ -30,7 +30,7 @@
     <body class="">
         <nav class="navbar navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand">S0ng</a>
+                <a class="navbar-brand" href="{{ route('home') }}">S0ng</a>
                 <form class="d-flex">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
@@ -38,7 +38,7 @@
             </div>
         </nav>
         <div class="row justify-content-center">
-            <div class="col-sm-12 col-md-auto">
+            <div class="col-sm-12 col-md-6">
                 @yield('content')
             </div>
         </div>

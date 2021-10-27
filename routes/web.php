@@ -17,7 +17,7 @@ use App\Models\Artist;
 |
 */
 
-Route::get('/', function () {
+Route::name('home')->get('/', function () {
     return redirect(route('song.index'));
 });
 
