@@ -18,7 +18,7 @@ use App\Models\Artist;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect(route('song.index'));
 });
 
 // Route::prefix('song')->group(function(){
