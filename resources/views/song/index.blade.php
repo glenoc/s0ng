@@ -7,9 +7,17 @@
 @endsection
 
 @section('content')
-<ul>
-@foreach ($songs as $song)
-<li><a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a></li>
-@endforeach
-</ul>
+<div class="card mt-2">
+    <div class="card-header d-flex justify-content-between">
+        <span class="h2 card-title">Songs</span>
+        <a class="btn btn-outline-success" href="{{Route('song.create')}}">Create new</a>
+    </div>
+    <div class="card-body">
+        <ul>
+        @foreach ($songs as $song)
+        <li><a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a></li>
+        @endforeach
+        </ul>
+    </div>
+</div>
 @endsection
