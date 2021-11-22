@@ -31,10 +31,10 @@
         <nav class="navbar navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="{{ route('home') }}">S0ng</a>
-                <form class="d-flex">
-                @csrf
-                @method('GET')
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" action="{{route('song.search')}}">
+                {{-- @csrf --}}
+                {{-- @method('GET') --}}
+                <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>

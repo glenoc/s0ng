@@ -38,6 +38,7 @@ Route::name('home')->get('/', function () {
 // });
 
 Route::resource('song', SongController::class);
+Route::name('song.search')->get('song.search', [SongController::class, 'search']);
 
 Route::resource('artist', ArtistController::class);
 

@@ -15,8 +15,14 @@ class SongController extends Controller
     }
     //
     public function index(){
-        $songs = Song::with('artist')->get();
+        $songs = Song::with('artist')->orderBy('name')->get();
         return view('song.index', ['songs' => $songs]);
+    }
+
+    public function search(Request $request){
+        $request->validate(['search' => 'required|string|max:80']);
+        $songs = Song::with('artist')->where('name', 'like', '%'.$request->search.'%')->orderBy('name')->get();
+        return view('song.search', ['songs' => $songs, 'search' => $request->search]);
     }
 
         /**
