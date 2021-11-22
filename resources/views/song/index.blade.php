@@ -10,7 +10,7 @@
 <div class="card mt-2">
     <div class="card-header d-flex justify-content-between">
         <span class="h2 card-title">Songs</span>
-        <a class="btn btn-outline-success" href="{{Route('song.create')}}">Create new</a>
+        @auth <a class="btn btn-outline-success" href="{{Route('song.create')}}">Create new</a> @endauth
     </div>
     <div class="card-body">
         <ul>

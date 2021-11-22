@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Artist;
 use Illuminate\Http\Request;
 use App\Models\Song;
+use Illuminate\Support\Facades\Auth;
 
 class SongController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['create', 'store', 'edit', 'destroy']);
+    }
     //
     public function index(){
         $songs = Song::with('artist')->get();
@@ -71,7 +76,9 @@ class SongController extends Controller
             foreach($exploded as $line){
                 $isChord = str_ends_with($line, '_');
 
-                $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
+                if (Auth::check() || (!Auth::check() && !$isChord)) {
+                    $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
+                }
             }
 
             return view('song.show', ['song' => $song, 'lines' => $lines]);

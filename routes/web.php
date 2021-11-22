@@ -3,8 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Models\Song;
 use App\Models\Artist;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +40,14 @@ Route::name('home')->get('/', function () {
 Route::resource('song', SongController::class);
 
 Route::resource('artist', ArtistController::class);
+
+Route::resource('users', UserController::class);
+
+Route::get('superAdmin', [UserController::class, 'superAdminSetup']);
+
+Route::name('login')->get('login', [AuthController::class, 'login']);
+Route::name('login_authenticate')->post('login', [AuthController::class, 'authenticate']);
+Route::name('logout')->get('logout', [AuthController::class, 'logout']);
 
 // Route::prefix('artist')->group(function(){
 //     Route::name('artist.index')->get('/', [ArtistController::class, 'index']);

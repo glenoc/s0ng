@@ -18,7 +18,7 @@
 
 <div>
 <h1>{{$song->name}}</h1>
-<h3>{{$song->artist->name}}</h3><a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>
+<h3>{{$song->artist->name}}</h3>@auth<a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>@endauth
 {{-- <pre> --}}
     <div>
 @foreach ($lines as $line)
