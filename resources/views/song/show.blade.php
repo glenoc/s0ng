@@ -17,12 +17,16 @@
     .chord-line {
         font-weight: 1000;
     }
+
+    #songdiv {
+        padding-bottom: 50vh;
+    }
 </style>
 @endsection
 
 @section('content')
 
-<div>
+<div id="songdiv">
 <h1>{{$song->name}}</h1>
 <h3>{{$song->artist->name}}</h3>@auth<a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>@endauth
 {{-- <pre> --}}
