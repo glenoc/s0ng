@@ -3,10 +3,13 @@
 @section('style')
 <style>
     .song-text {
-        font-family: 'PT Mono', monospace;
-        white-space: pre;
-        display: block;
         font-size: 2.7vw;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .song-text {
+            font-size: 2.7vw;
+        }
     }
 
     .chord-line {
