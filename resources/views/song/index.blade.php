@@ -2,7 +2,9 @@
 
 @section('style')
 <style>
-
+ul {
+    padding-left: 0.5rem;
+}
 </style>
 @endsection
 

@@ -6,10 +6,11 @@
         font-family: 'PT Mono', monospace;
         white-space: pre;
         display: block;
+        font-size: 2.7vw;
     }
 
     .chord-line {
-        font-weight: 700;
+        font-weight: 1000;
     }
 </style>
 @endsection
