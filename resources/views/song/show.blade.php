@@ -3,7 +3,9 @@
 @section('style')
 <style>
     .song-text {
-        font-size: 2.7vw;
+        font-family: 'PT Mono', monospace;
+        white-space: pre;
+        display: block;
     }
 
     @media only screen and (max-width: 600px) {
