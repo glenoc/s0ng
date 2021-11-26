@@ -14,7 +14,7 @@ class AddUsernameToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('username')->after('email')->unique();
+            $table->string('username', 100)->after('email')->unique();
             $table->boolean('isSuperAdmin')->default(0);
         });
     }
