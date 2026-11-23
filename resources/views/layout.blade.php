@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>S0ng</title>
 
@@ -37,8 +38,22 @@
                 <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
+                @auth
+                    <a class="btn btn-outline-light ms-2" href="{{ route('logout') }}">Log ud</a>
+                @else
+                    <a class="btn btn-outline-light ms-2" href="{{ route('login') }}">Log ind</a>
+                @endauth
             </div>
         </nav>
+        <div
+            id="song-start-notifications"
+            class="container position-fixed top-0 start-50 translate-middle-x mt-3"
+            style="z-index: 1080; pointer-events: none;"
+            data-poll-url="{{ route('song-starts.poll') }}"
+            data-latest-id="{{ \App\Models\SongStart::max('id') ?? 0 }}"
+            aria-live="polite"
+            aria-atomic="false"
+        ></div>
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12">

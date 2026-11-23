@@ -28,7 +28,14 @@
 
 <div id="songdiv">
 <h1>{{$song->name}}</h1>
-<h3>{{$song->artist->name}}</h3>@auth<a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>@endauth
+<h3>{{$song->artist->name}}</h3>
+@auth
+    <form class="d-inline" method="POST" action="{{ route('song-starts.store', $song) }}">
+        @csrf
+        <button class="btn btn-outline-primary" type="submit">Start sangen</button>
+    </form>
+    <a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>
+@endauth
 {{-- <pre> --}}
     <div>
 @foreach ($lines as $line)

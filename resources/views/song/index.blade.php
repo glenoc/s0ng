@@ -17,7 +17,15 @@ ul {
     <div class="card-body">
         <ul>
         @foreach ($songs as $song)
-        <li><a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a></li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+            <a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a>
+            @auth
+                <form method="POST" action="{{ route('song-starts.store', $song) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Start sangen</button>
+                </form>
+            @endauth
+        </li>
         @endforeach
         </ul>
     </div>

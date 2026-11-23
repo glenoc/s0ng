@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Models\Song;
 use App\Models\Artist;
 use App\Models\User;
+use App\Http\Controllers\SongStartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,8 @@ Route::name('home')->get('/', function () {
 
 Route::resource('song', SongController::class);
 Route::name('song.search')->get('song.search', [SongController::class, 'search']);
+Route::name('song-starts.poll')->get('song-starts', [SongStartController::class, 'poll']);
+Route::name('song-starts.store')->post('song/{song}/start', [SongStartController::class, 'store'])->middleware('auth');
 
 Route::resource('artist', ArtistController::class);
 
