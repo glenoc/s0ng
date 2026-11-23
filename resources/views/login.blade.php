@@ -12,12 +12,22 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ mix('css/app.css') }}" type="text/css">
+    <script src="{{ mix('js/app.js') }}"></script>
 
  </head>
- <body class="">
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('home') }}">S0ng</a>
+ <body data-theme="normal">
+    <nav class="navbar navbar-dark song-navbar">
+        <div class="container">
+            <a class="navbar-brand song-brand" href="{{ route('home') }}">
+                <span class="song-brand-mark" aria-hidden="true">♪</span>
+                <span>S0ng</span>
+            </a>
+            <label class="visually-hidden" for="theme-select">Vælg tema</label>
+            <select id="theme-select" class="form-select song-theme-select ms-auto" aria-label="Vælg tema">
+                <option value="normal">Normal</option>
+                <option value="dark">Dark</option>
+                <option value="christmas" disabled>Jul (15/11-31/12)</option>
+            </select>
         </div>
     </nav>
     <div class="container">

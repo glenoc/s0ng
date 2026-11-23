@@ -28,23 +28,50 @@
 
         @yield('style')
     </head>
-    <body class="">
-        <nav class="navbar navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ route('home') }}">S0ng</a>
-                <form class="d-flex" action="{{route('song.search')}}">
-                {{-- @csrf --}}
-                {{-- @method('GET') --}}
-                <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-                @auth
-                    <a class="btn btn-outline-light ms-2" href="{{ route('logout') }}">Log ud</a>
-                @else
-                    <a class="btn btn-outline-light ms-2" href="{{ route('login') }}">Log ind</a>
-                @endauth
+    <body data-theme="normal">
+        <nav class="navbar navbar-expand-lg navbar-dark song-navbar">
+            <div class="container">
+                <a class="navbar-brand song-brand" href="{{ route('home') }}">
+                    <span class="song-brand-mark" aria-hidden="true">♪</span>
+                    <span>S0ng</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#songNavbar" aria-controls="songNavbar" aria-expanded="false" aria-label="Åbn menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="songNavbar">
+                    <ul class="navbar-nav me-lg-auto mb-3 mb-lg-0">
+                        <li class="nav-item">
+                            <a @class(['nav-link', 'active' => request()->routeIs('song.*')]) href="{{ route('song.index') }}">Sange</a>
+                        </li>
+                        <li class="nav-item">
+                            <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">Kunstnere</a>
+                        </li>
+                    </ul>
+                    <form class="song-search" action="{{ route('song.search') }}" role="search">
+                        <label class="visually-hidden" for="song-search">Søg i sangbogen</label>
+                        <input id="song-search" class="form-control" type="search" name="search" placeholder="Find en sang..." aria-label="Søg">
+                        <button class="btn song-search-button" type="submit">Søg</button>
+                    </form>
+                    <div class="song-nav-actions">
+                        <label class="visually-hidden" for="theme-select">Vælg tema</label>
+                        <select id="theme-select" class="form-select song-theme-select" aria-label="Vælg tema">
+                            <option value="normal">Normal</option>
+                            <option value="dark">Dark</option>
+                            <option value="christmas" disabled>Jul (15/11-31/12)</option>
+                        </select>
+                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false">
+                            Sne: fra
+                        </button>
+                        @auth
+                            <a class="btn song-auth-button" href="{{ route('logout') }}">Log ud</a>
+                        @else
+                            <a class="btn song-auth-button" href="{{ route('login') }}">Log ind</a>
+                        @endauth
+                    </div>
+                </div>
             </div>
         </nav>
+        <div id="snow-effect" aria-hidden="true"></div>
         <div
             id="song-start-notifications"
             class="container position-fixed top-0 start-50 translate-middle-x mt-3"
