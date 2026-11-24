@@ -1,13 +1,29 @@
 @extends('layout')
 
-@section('content')
+@section('style')
+<style>
+ul {
+    padding-left: 0.5rem;
+}
+</style>
+@endsection
 
-<div>
-<h1>Artists</h1>
-<ul>
-@foreach ($artists as $artist)
-    <li><a href="{{route('artist.show', $artist->id)}}">{{$artist->name}}</a></li>
-@endforeach 
-</ul>
+@section('content')
+<div class="card mt-2">
+    <div class="card-header">
+        <span class="h2 card-title">Artists</span>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+        @foreach ($artists as $artist)
+        <li class="d-flex justify-content-between align-items-center mb-2">
+            <a href="{{ route('artist.show', $artist->id) }}">{{ $artist->name }}</a>
+            <span class="badge rounded-pill text-bg-secondary">
+                {{ $artist->songs_count }} {{ $artist->songs_count === 1 ? 'sang' : 'sange' }}
+            </span>
+        </li>
+        @endforeach
+        </ul>
+    </div>
 </div>
 @endsection
