@@ -14,7 +14,7 @@ class ArtistController extends Controller
     */
     public function index()
     {
-        $artists = Artist::withCount('songs')->orderBy('name')->get();
+        $artists = Artist::withCount('songs')->orderBy('name')->where('songs_count', '>', 0)->get();
         return view('artists.index', ['artists' => $artists]);
     }
 
@@ -97,7 +97,7 @@ class ArtistController extends Controller
     public function destroy(Artist $artist)
     {
         $artist->delete();
-        
+
         return redirect(route('artist.index'));
     }
 }
