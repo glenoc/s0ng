@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 : savedTheme;
 
             christmasOption.disabled = !seasonActive;
-            christmasOption.textContent = seasonActive ? 'Jul' : 'Jul (15/11-31/12)';
+            christmasOption.textContent = seasonActive ? themeSelect.dataset.christmas : themeSelect.dataset.christmasSeason;
             applyTheme(selectedTheme === 'christmas' && !seasonActive ? 'normal' : selectedTheme);
         }
 
@@ -181,8 +181,8 @@ document.addEventListener('DOMContentLoaded', function () {
         function renderSnow() {
             snowToggle.disabled = !seasonActive;
             snowToggle.textContent = seasonActive
-                ? (snowEnabled ? 'Sne: til' : 'Sne: fra')
-                : 'Sne: kun 15/11-31/12';
+                ? (snowEnabled ? snowToggle.dataset.snowOn : snowToggle.dataset.snowOff)
+                : snowToggle.dataset.snowSeason;
             snowToggle.setAttribute('aria-pressed', String(snowEnabled));
             window.clearInterval(snowTimer);
             window.removeEventListener('resize', resizePile);
@@ -322,21 +322,21 @@ document.addEventListener('DOMContentLoaded', function () {
         alert.style.pointerEvents = 'auto';
 
         const message = document.createElement('span');
-        message.textContent = 'Der startes nu på: ' + start.song_name + (start.artist_name ? ' - ' + start.artist_name : '');
+        message.textContent = notifications.dataset.songStarted.replace(':song', () => start.song_name) + (start.artist_name ? ' - ' + start.artist_name : '');
         alert.appendChild(message);
 
         if (start.url) {
             const link = document.createElement('a');
             link.className = 'btn btn-sm btn-primary ms-3';
             link.href = start.url;
-            link.textContent = 'Åbn sangen';
+            link.textContent = notifications.dataset.openSong;
             alert.appendChild(link);
         }
 
         const dismiss = document.createElement('button');
         dismiss.className = 'btn-close ms-3';
         dismiss.type = 'button';
-        dismiss.setAttribute('aria-label', 'Luk besked');
+        dismiss.setAttribute('aria-label', notifications.dataset.closeNotification);
         dismiss.addEventListener('click', function () {
             alert.remove();
         });

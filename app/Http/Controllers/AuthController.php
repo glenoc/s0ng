@@ -24,7 +24,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
+            'username' => __('auth.failed'),
         ]);
     }
 

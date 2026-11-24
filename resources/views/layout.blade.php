@@ -34,44 +34,44 @@
                     <span class="song-brand-mark" aria-hidden="true">♪</span>
                     <span>S0ng</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#songNavbar" aria-controls="songNavbar" aria-expanded="false" aria-label="Åbn menu">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#songNavbar" aria-controls="songNavbar" aria-expanded="false" aria-label="{{ __('ui.open_menu') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="songNavbar">
                     <ul class="navbar-nav me-lg-auto mb-3 mb-lg-0">
                         <li class="nav-item">
-                            <a @class(['nav-link', 'active' => request()->routeIs('song.*')]) href="{{ route('song.index') }}">Sange</a>
+                            <a @class(['nav-link', 'active' => request()->routeIs('song.*')]) href="{{ route('song.index') }}">{{ __('ui.songs') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">Kunstnere</a>
+                            <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">{{ __('ui.artists') }}</a>
                         </li>
                     </ul>
                     <form class="song-search" action="{{ route('song.search') }}" role="search">
-                        <label class="visually-hidden" for="song-search">Søg i sangbogen</label>
-                        <input id="song-search" class="form-control" type="search" name="search" placeholder="Find en sang..." aria-label="Søg">
-                        <button class="btn song-search-button" type="submit">Søg</button>
+                        <label class="visually-hidden" for="song-search">{{ __('ui.search_songbook') }}</label>
+                        <input id="song-search" class="form-control" type="search" name="search" placeholder="{{ __('ui.find_song') }}" aria-label="{{ __('ui.search') }}">
+                        <button class="btn song-search-button" type="submit">{{ __('ui.search') }}</button>
                     </form>
                     <div class="song-nav-actions">
-                        <label class="visually-hidden" for="theme-select">Vælg tema</label>
-                        <select id="theme-select" class="form-select song-theme-select" aria-label="Vælg tema">
-                            <option value="normal">Normal</option>
-                            <option value="dark">Dark</option>
-                            <option value="christmas" disabled>Jul (15/11-31/12)</option>
+                        <label class="visually-hidden" for="theme-select">{{ __('ui.select_theme') }}</label>
+                        <select id="theme-select" class="form-select song-theme-select" aria-label="{{ __('ui.select_theme') }}" data-christmas="{{ __('ui.christmas') }}" data-christmas-season="{{ __('ui.christmas_season') }}">
+                            <option value="normal">{{ __('ui.normal') }}</option>
+                            <option value="dark">{{ __('ui.dark') }}</option>
+                            <option value="christmas" disabled>{{ __('ui.christmas_season') }}</option>
                         </select>
-                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false">
-                            Sne: fra
+                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false" data-snow-on="{{ __('ui.snow_on') }}" data-snow-off="{{ __('ui.snow_off') }}" data-snow-season="{{ __('ui.snow_season') }}">
+                            {{ __('ui.snow_off') }}
                         </button>
                         @auth
-                            <a class="btn song-auth-button" href="{{ route('logout') }}">Log ud</a>
+                            <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
                         @else
-                            <a class="btn song-auth-button" href="{{ route('login') }}">Log ind</a>
+                            <a class="btn song-auth-button" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
                         @endauth
                     </div>
                 </div>
             </div>
         </nav>
         <div id="snow-effect" aria-hidden="true"></div>
-        <button id="snow-shovel" class="snow-shovel" type="button" aria-label="Sneskraber: træk for at skubbe sneen" aria-describedby="snow-shovel-help" hidden>
+        <button id="snow-shovel" class="snow-shovel" type="button" aria-label="{{ __('ui.snow_shovel') }}" aria-describedby="snow-shovel-help" hidden>
             <svg viewBox="0 0 52 72" aria-hidden="true">
                 <defs>
                     <linearGradient id="shovel-handle" x1="0" y1="0" x2="1" y2="0">
@@ -96,13 +96,15 @@
                 <path d="M6 68h40" stroke="#ff9b83" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
             </svg>
         </button>
-        <span id="snow-shovel-help" class="visually-hidden">Træk sneskraberen med mus eller finger, eller brug venstre og højre piletast til at skubbe sneen.</span>
         <div
             id="song-start-notifications"
             class="container position-fixed top-0 start-50 translate-middle-x mt-3"
             style="z-index: 1080; pointer-events: none;"
             data-poll-url="{{ route('song-starts.poll') }}"
             data-latest-id="{{ \App\Models\SongStart::max('id') ?? 0 }}"
+            data-song-started="{{ __('ui.song_started') }}"
+            data-open-song="{{ __('ui.open_song') }}"
+            data-close-notification="{{ __('ui.close_notification') }}"
             aria-live="polite"
             aria-atomic="false"
         ></div>

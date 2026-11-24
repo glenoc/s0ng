@@ -12,17 +12,17 @@
 
 <div class="card mt-2">
     <div class="card-header d-flex justify-content-between">
-        <span class="h2 card-title">Create song</span>
+        <span class="h2 card-title">{{ __('ui.create_song') }}</span>
     </div>
     <div class="card-body">
         <form action="{{route('song.store')}}" method="POST">
         {{ csrf_field() }}
         <div class="mb-3">
-        <label for="titleInput" class="form-label">Name</label>
+        <label for="titleInput" class="form-label">{{ __('ui.name') }}</label>
         <input type="text" class="form-control" id="titleInput" name="name">
         </div>
         <div class="mb-3">
-            <label for="artistInput" class="form-label">Artist</label>
+            <label for="artistInput" class="form-label">{{ __('ui.artist') }}</label>
             <input type="text" class="form-control" id="artistInput" name="artist" list="artistInputData">
             <datalist id="artistInputData">
                 @foreach ($artists as $artist)
@@ -36,10 +36,10 @@
             </select> --}}
         </div>
         <div class="mb-3">
-        <label for="textInput" class="form-label">Text</label>
+        <label for="textInput" class="form-label">{{ __('ui.text') }}</label>
         <textarea class="form-control" id="textInput" name="text" rows="50"></textarea>
         </div>
-        <input type="submit" class="btn btn-primary">
+        <input type="submit" value="{{ __('ui.create') }}" class="btn btn-primary">
         </form>
     </div>
 </div>

@@ -9,7 +9,7 @@
     <div class="mt-3 px-2">
         <div class="card">
             <div class="card-header">
-                <h1>Edit user <small>{{ $user->username }}</small></h1>
+                <h1>{{ __('ui.edit_user') }} <small>{{ $user->username }}</small></h1>
             </div>
             <div class="card-body py-2">
                 <form class="form-horizontal" id="edit-user-form" method="POST"
@@ -18,7 +18,7 @@
                     @method('PUT')
 
                     <div class="form-group row{{ $errors->has('username') ? ' has-error' : '' }}">
-                        <label for="username" class="col-md-4 control-label">Username</label>
+                        <label for="username" class="col-md-4 control-label">{{ __('ui.username') }}</label>
 
                         <div class="col-md-6">
                             <input id="username" type="text" class="form-control" name="username"
@@ -33,13 +33,13 @@
                     <div class="form-group row">
                         <div class="col-sm-12">
                             <a class="btn btn-info" data-bs-toggle="collapse" href="#change-password-subform" role="button" aria-expanded="false" aria-controls="change-password-subform">
-                                Change password
+                                {{ __('ui.change_password') }}
                             </a>
                         </div>
                     </div>
                     <div id="change-password-subform" class="collapse {{ $errors->has('password') ? ' show' : '' }}">
                         <div class="form-group row {{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">New password</label>
+                            <label for="password" class="col-md-4 control-label">{{ __('ui.new_password') }}</label>
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control" name="password">
@@ -53,7 +53,7 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="password-confirm" class="col-md-4 control-label">Confirm new password</label>
+                            <label for="password-confirm" class="col-md-4 control-label">{{ __('ui.confirm_new_password') }}</label>
 
                             <div class="col-md-6">
                                 <input id="password-confirm" type="password" class="form-control"
@@ -65,13 +65,13 @@
                         <div class="col-sm-6 my-3">
                             @if(!$isMe)
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                Delete
+                                {{ __('ui.delete') }}
                             </button>
                             @endif
                         </div>
                         <div class="col-sm-6 my-3">
                             <button type="submit" class="btn btn-primary float-right" id="save-user-btn">
-                                Save
+                                {{ __('ui.save') }}
                             </button>
                         </div>
                     </div>
@@ -85,19 +85,19 @@
         <!-- Modal content-->
         <div class="modal-content card-warning">
             <div class="modal-header">
-                <h4 class="modal-title">Warning</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">{{ __('ui.warning') }}</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('ui.close') }}">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the user <span style="font-weight: bold">{{$user->username}}</span>.</p>
+                <p>{!! __('ui.confirm_delete_user', ['username' => e($user->username)]) !!}</p>
             </div>
             <div class="modal-footer">
                 <form style="display: inline-block" method="post" action="{{route('users.destroy', [$user])}}">
                     {{ method_field('DELETE')}}
                     {{ csrf_field() }}
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">{{ __('ui.delete') }}</button>
                 </form>
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{{ __('ui.close') }}</button>
             </div>
         </div>
     </div>

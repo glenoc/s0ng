@@ -9,7 +9,7 @@
 @section('content')
 <div class="card mt-2">
     <div class="card-header d-flex justify-content-between">
-        <span class="h2 card-title">Songs search - <span class="h4">{{$search}}</span></span>
+        <span class="h2 card-title">{{ __('ui.search_songs') }} - <span class="h4">{{$search}}</span></span>
     </div>
     <div class="card-body">
         <ul>

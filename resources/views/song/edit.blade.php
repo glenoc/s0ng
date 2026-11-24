@@ -19,11 +19,11 @@
 {{ csrf_field() }}
 {{ method_field('PUT') }}
 <div class="mb-3">
-  <label for="titleInput" class="form-label">Name</label>
+  <label for="titleInput" class="form-label">{{ __('ui.name') }}</label>
   <input type="text" class="form-control" id="titleInput" name="name" value="{{$song->name}}">
 </div>
 <div class="mb-3">
-    <label for="artistInput" class="form-label">Artist</label>
+    <label for="artistInput" class="form-label">{{ __('ui.artist') }}</label>
     <input type="text" class="form-control" id="artistInput" name="artist" value="{{$song->artist->name}}" list="artistInputData">
     <datalist id="artistInputData">
         @foreach ($artists as $artist)
@@ -37,10 +37,10 @@
     </select> --}}
 </div>
 <div class="mb-3">
-  <label for="textInput" class="form-label">Text</label>
+  <label for="textInput" class="form-label">{{ __('ui.text') }}</label>
   <textarea class="form-control" id="textInput" name="text" rows="50">{{$song->text}}</textarea>
 </div>
-<input type="submit" class="btn btn-primary">
+<input type="submit" value="{{ __('ui.save') }}" class="btn btn-primary">
 </form>
 </div>
 @endsection

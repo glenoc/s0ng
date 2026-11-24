@@ -1,5 +1,5 @@
  <!DOCTYPE html>
- <html>
+ <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,25 +21,25 @@
                 <span class="song-brand-mark" aria-hidden="true">♪</span>
                 <span>S0ng</span>
             </a>
-            <label class="visually-hidden" for="theme-select">Vælg tema</label>
-            <select id="theme-select" class="form-select song-theme-select ms-auto" aria-label="Vælg tema">
-                <option value="normal">Normal</option>
-                <option value="dark">Dark</option>
-                <option value="christmas" disabled>Jul (15/11-31/12)</option>
+            <label class="visually-hidden" for="theme-select">{{ __('ui.select_theme') }}</label>
+            <select id="theme-select" class="form-select song-theme-select ms-auto" aria-label="{{ __('ui.select_theme') }}" data-christmas="{{ __('ui.christmas') }}" data-christmas-season="{{ __('ui.christmas_season') }}">
+                <option value="normal">{{ __('ui.normal') }}</option>
+                <option value="dark">{{ __('ui.dark') }}</option>
+                <option value="christmas" disabled>{{ __('ui.christmas_season') }}</option>
             </select>
         </div>
     </nav>
     <div class="container">
         <div class="card card-default mt-4">
             <div class="card-header">
-                <span class="h1">Login</span>
+                <span class="h1">{{ __('ui.log_in') }}</span>
             </div>
             <div class="card-body">
                 <form class="form-horizontal" method="POST" action="{{ route('login') }}">
                     {{ csrf_field() }}
 
                     <div class="form-group row my-2  {{ $errors->has('username') ? ' has-error' : '' }}">
-                        <label for="username" class="col-md-4 control-label">Username</label>
+                        <label for="username" class="col-md-4 control-label">{{ __('ui.username') }}</label>
 
                         <div class="col-md-6">
                             <input id="username" type="username" class="form-control" name="username" value="{{ old('username') }}" required autofocus>
@@ -53,7 +53,7 @@
                     </div>
 
                     <div class="form-group row my-2 {{ $errors->has('password') ? ' has-error' : '' }}">
-                        <label for="password" class="col-md-4 control-label">Password</label>
+                        <label for="password" class="col-md-4 control-label">{{ __('ui.password') }}</label>
 
                         <div class="col-md-6">
                             <input id="password" type="password" class="form-control" name="password" required>
@@ -68,7 +68,7 @@
                     <div class="form-group row my-2">
                         <div class="col-md-8 offset-md-4">
                             <button type="submit" class="btn btn-primary">
-                                Login
+                                {{ __('ui.log_in') }}
                             </button>
                         </div>
                     </div>
