@@ -164,7 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
             canvas.className = 'snow-pile';
             snowEffect.appendChild(canvas);
             resizePile();
-            positionShovel(Math.floor(pile.length / 2));
+            positionShovel(Math.floor(pile.length * 0.96));
+            snowShovel.style.left = '96%';
             window.addEventListener('resize', resizePile);
             snowTimer = window.setInterval(function () {
                 let freeSpace = pile.reduce((total, height) => total + pileHeight - height, 0) - shovelLoad;
@@ -248,7 +249,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             pointerId = event.pointerId;
             lastIndex = keyboardIndex;
-            gripOffset = event.clientX - (keyboardIndex + 0.5) / pile.length * window.innerWidth;
+            const shovelBounds = snowShovel.getBoundingClientRect();
+            gripOffset = event.clientX - (shovelBounds.left + shovelBounds.width / 2);
             snowShovel.setPointerCapture(pointerId);
         });
         snowShovel.addEventListener('pointermove', function (event) {
