@@ -9,8 +9,8 @@
     }
 
     @media only screen and (max-width: 600px) {
-        .song-text {
-            font-size: 2.7vw;
+        #song-lyrics {
+            overflow-x: auto;
         }
     }
 
@@ -37,7 +37,7 @@
     <a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">{{ __('ui.edit') }}</a>
 @endauth
 {{-- <pre> --}}
-    <div>
+    <div id="song-lyrics">
 @foreach ($lines as $line)
 <span class="{{$line->isChord?'chord-line':'text-line'}} song-text">{{$line->text}}</span>
 @endforeach
