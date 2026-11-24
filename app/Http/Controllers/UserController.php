@@ -60,7 +60,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return redirect()->route('users.index')->with('notificationSuccess', 'User updated');
+        return redirect()->route('users.index')->with('notificationSuccess', __('ui.user_created'));
     }
 
 

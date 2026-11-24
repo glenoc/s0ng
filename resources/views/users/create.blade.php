@@ -10,7 +10,7 @@
     <div class="mt-3 px-2">
         <div class="card">
             <div class="card-header">
-                <h1>Create user</h1>
+                <h1>{{ __('ui.create_user') }}</h1>
             </div>
             <div class="card-body py-2">
                 <form class="form-horizontal" id="create-user-form" method="POST"
@@ -18,7 +18,7 @@
                     {{ csrf_field() }}
                     {{ method_field('POST') }}
                     <div class="form-group row my-2 {{ $errors->has('username') ? ' has-error' : '' }}">
-                        <label for="username" class="col-md-4 control-label">Username</label>
+                        <label for="username" class="col-md-4 control-label">{{ __('ui.username') }}</label>
 
                         <div class="col-md-6">
                             <input id="username" type="text" class="form-control" name="username"
@@ -31,7 +31,7 @@
                         </div>
                     </div>
                     <div class="form-group row my-2{{ $errors->has('password') ? ' has-error' : '' }}">
-                        <label for="password" class="col-md-4 control-label">Password</label>
+                        <label for="password" class="col-md-4 control-label">{{ __('ui.password') }}</label>
 
                         <div class="col-md-6">
                             <input id="password" type="password" class="form-control" name="password">
@@ -45,7 +45,7 @@
                     </div>
 
                     <div class="form-group row my-2">
-                        <label for="password-confirm" class="col-md-4 control-label">Confirm password</label>
+                        <label for="password-confirm" class="col-md-4 control-label">{{ __('ui.confirm_password') }}</label>
 
                         <div class="col-md-6">
                             <input id="password-confirm" type="password" class="form-control"
@@ -57,7 +57,7 @@
                         </div>
                         <div class="col-sm-6">
                             <button type="submit" class="btn btn-primary float-right" id="create-user-btn">
-                                Create
+                                {{ __('ui.create') }}
                             </button>
                         </div>
                     </div>

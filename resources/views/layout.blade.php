@@ -12,8 +12,7 @@
         <link href="https://fonts.googleapis.com/css2?family=PT+Mono&display=swap" rel="stylesheet">
 
 
-        <link rel="stylesheet" href="{{ mix('css/app.css') }}" type="text/css">
-        <script src="{{ mix('js/app.js') }}"></script>
+        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
         <!-- Styles -->
         <style>
@@ -35,49 +34,77 @@
                     <span class="song-brand-mark" aria-hidden="true">♪</span>
                     <span>S0ng</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#songNavbar" aria-controls="songNavbar" aria-expanded="false" aria-label="Åbn menu">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#songNavbar" aria-controls="songNavbar" aria-expanded="false" aria-label="{{ __('ui.open_menu') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="songNavbar">
                     <ul class="navbar-nav me-lg-auto mb-3 mb-lg-0">
                         <li class="nav-item">
-                            <a @class(['nav-link', 'active' => request()->routeIs('song.*')]) href="{{ route('song.index') }}">Sange</a>
+                            <a @class(['nav-link', 'active' => request()->routeIs('song.*')]) href="{{ route('song.index') }}">{{ __('ui.songs') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">Kunstnere</a>
+                            <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">{{ __('ui.artists') }}</a>
                         </li>
                     </ul>
                     <form class="song-search" action="{{ route('song.search') }}" role="search">
-                        <label class="visually-hidden" for="song-search">Søg i sangbogen</label>
-                        <input id="song-search" class="form-control" type="search" name="search" placeholder="Find en sang..." aria-label="Søg">
-                        <button class="btn song-search-button" type="submit">Søg</button>
+                        <label class="visually-hidden" for="song-search">{{ __('ui.search_songbook') }}</label>
+                        <input id="song-search" class="form-control" type="search" name="search" placeholder="{{ __('ui.find_song') }}" aria-label="{{ __('ui.search') }}">
+                        <button class="btn song-search-button" type="submit">{{ __('ui.search') }}</button>
                     </form>
                     <div class="song-nav-actions">
-                        <label class="visually-hidden" for="theme-select">Vælg tema</label>
-                        <select id="theme-select" class="form-select song-theme-select" aria-label="Vælg tema">
-                            <option value="normal">Normal</option>
-                            <option value="dark">Dark</option>
-                            <option value="christmas" disabled>Jul (15/11-31/12)</option>
+                        <label class="visually-hidden" for="theme-select">{{ __('ui.select_theme') }}</label>
+                        <select id="theme-select" class="form-select song-theme-select" aria-label="{{ __('ui.select_theme') }}" data-christmas="{{ __('ui.christmas') }}" data-christmas-season="{{ __('ui.christmas_season') }}">
+                            <option value="normal">{{ __('ui.normal') }}</option>
+                            <option value="dark">{{ __('ui.dark') }}</option>
+                            <option value="christmas" disabled>{{ __('ui.christmas_season') }}</option>
                         </select>
-                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false">
-                            Sne: fra
+                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false" data-snow-on="{{ __('ui.snow_on') }}" data-snow-off="{{ __('ui.snow_off') }}" data-snow-season="{{ __('ui.snow_season') }}">
+                            {{ __('ui.snow_off') }}
                         </button>
                         @auth
-                            <a class="btn song-auth-button" href="{{ route('logout') }}">Log ud</a>
+                            <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
                         @else
-                            <a class="btn song-auth-button" href="{{ route('login') }}">Log ind</a>
+                            <a class="btn song-auth-button" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
                         @endauth
                     </div>
                 </div>
             </div>
         </nav>
         <div id="snow-effect" aria-hidden="true"></div>
+        <button id="snow-shovel" class="snow-shovel" type="button" aria-label="{{ __('ui.snow_shovel') }}" aria-describedby="snow-shovel-help" hidden>
+            <svg viewBox="0 0 52 72" aria-hidden="true">
+                <defs>
+                    <linearGradient id="shovel-handle" x1="0" y1="0" x2="1" y2="0">
+                        <stop stop-color="#a96b35"/>
+                        <stop offset=".45" stop-color="#f0c482"/>
+                        <stop offset="1" stop-color="#b7793e"/>
+                    </linearGradient>
+                    <linearGradient id="shovel-blade" x1="0" y1="0" x2="1" y2="1">
+                        <stop stop-color="#ff5144"/>
+                        <stop offset=".5" stop-color="#e61516"/>
+                        <stop offset="1" stop-color="#a90d10"/>
+                    </linearGradient>
+                </defs>
+                <path d="M24 13h4v35h-4z" fill="url(#shovel-handle)" stroke="#a76b35" stroke-width=".5"/>
+                <path d="M16 2h20l-1 5q-1 6-6 8h-6q-5-2-6-8zm4 3 .6 2q.6 3 3.4 4.5h4q2.8-1.5 3.4-4.5l.6-2z" fill="url(#shovel-blade)" fill-rule="evenodd" stroke="#9e1010" stroke-width="1" stroke-linejoin="round"/>
+                <path d="M18 3h16" stroke="#ff9a89" stroke-width=".8" stroke-linecap="round"/>
+                <path d="M10 48h32q3 0 4 4l3 14q.5 4-3 4H6q-3.5 0-3-4l3-14q1-4 4-4z" fill="url(#shovel-blade)" stroke="#971010" stroke-width="1.5"/>
+                <path d="M10 51h32M11 54 9 65m9-11-1 11m17-11 1 11m6-11 2 11" fill="none" stroke="#ff8d78" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+                <path d="M22 46h8v12q0 3-4 5-4-2-4-5z" fill="#c41013" stroke="#a40d11" stroke-width=".8"/>
+                <circle cx="26" cy="50" r="1" fill="#e1e4dc"/>
+                <circle cx="26" cy="54" r=".8" fill="#e1e4dc"/>
+                <path d="M6 68h40" stroke="#ff9b83" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+            </svg>
+        </button>
         <div
             id="song-start-notifications"
             class="container position-fixed top-0 start-50 translate-middle-x mt-3"
             style="z-index: 1080; pointer-events: none;"
             data-poll-url="{{ route('song-starts.poll') }}"
             data-latest-id="{{ \App\Models\SongStart::max('id') ?? 0 }}"
+            data-song-started="{{ __('ui.song_started') }}"
+            data-open-song="{{ __('ui.open_song') }}"
+            data-close-notification="{{ __('ui.close_notification') }}"
             aria-live="polite"
             aria-atomic="false"
         ></div>

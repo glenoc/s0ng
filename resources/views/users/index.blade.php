@@ -9,8 +9,8 @@
     <div class="col-12 mt-4">
         <div class="card">
             @can('isSuperAdmin')
-            <h1 class="card-header d-flex justify-content-between align-items-center">Users
-                <a class="btn btn-primary" href="{{route('users.create')}}">Create</a>
+            <h1 class="card-header d-flex justify-content-between align-items-center">{{ __('ui.users') }}
+                <a class="btn btn-primary" href="{{route('users.create')}}">{{ __('ui.create') }}</a>
             </h1>
             @endcan
             <div class="card-body">
@@ -19,7 +19,7 @@
                         <thead>
                             <tr>
                                 @can('isSuperAdmin')<th>#</th>@endcan
-                                <th>Username</th>
+                                <th>{{ __('ui.username') }}</th>
                                 @can('isSuperAdmin')<th></th>@endcan
                             </tr>
                         </thead>
@@ -30,7 +30,7 @@
                                 <td>{{$user->username}}</td>
                                 @can('isSuperAdmin')
                                 <td>
-                                    <a class="btn btn-info" href="{{ route('users.edit', [$user->id]) }}">Edit</a>
+                                    <a class="btn btn-info" href="{{ route('users.edit', [$user->id]) }}">{{ __('ui.edit') }}</a>
                                 </td>
                                 @endcan
                             </tr>

@@ -32,9 +32,9 @@
 @auth
     <form class="d-inline" method="POST" action="{{ route('song-starts.store', $song) }}">
         @csrf
-        <button class="btn btn-outline-primary" type="submit">Start sangen</button>
+        <button class="btn btn-outline-primary" type="submit">{{ __('ui.start_song') }}</button>
     </form>
-    <a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">Edit</a>
+    <a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">{{ __('ui.edit') }}</a>
 @endauth
 {{-- <pre> --}}
     <div>
