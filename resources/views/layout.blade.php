@@ -108,8 +108,8 @@
             aria-live="polite"
             aria-atomic="false"
         ></div>
-        <div class="container">
-            <div class="row justify-content-center">
+        <div class="@yield('content-container-class', 'container')">
+            <div class="row justify-content-center @yield('content-row-class')">
                 <div class="col-12">
                     @yield('content')
                 </div>
