@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', function () {
         function synchronizeThemeSeason() {
             const seasonActive = isSnowSeason();
             const savedTheme = window.localStorage.getItem(themePreferenceKey);
-            const selectedTheme = availableThemes.indexOf(savedTheme) === -1 ? 'normal' : savedTheme;
+            const selectedTheme = availableThemes.indexOf(savedTheme) === -1
+                ? (seasonActive ? 'christmas' : 'normal')
+                : savedTheme;
 
             christmasOption.disabled = !seasonActive;
             christmasOption.textContent = seasonActive ? 'Jul' : 'Jul (15/11-31/12)';
