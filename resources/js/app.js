@@ -2,6 +2,36 @@ import 'bootstrap';
 import { addSnow, createSnowPile, createSnowProfile, depositSnow, pushSnow } from './snow-pile.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const songLyrics = document.getElementById('song-lyrics');
+
+    if (songLyrics) {
+        const mobileScreen = window.matchMedia('(max-width: 600px)');
+        const lines = songLyrics.querySelectorAll('.song-text');
+
+        function fitSongLyrics() {
+            songLyrics.style.fontSize = '';
+
+            if (!mobileScreen.matches || !songLyrics.clientWidth) {
+                return;
+            }
+
+            const fontSize = parseFloat(window.getComputedStyle(songLyrics).fontSize);
+            let widestLine = songLyrics.clientWidth;
+
+            lines.forEach(function (line) {
+                widestLine = Math.max(widestLine, line.scrollWidth);
+            });
+
+            if (widestLine > songLyrics.clientWidth) {
+                songLyrics.style.fontSize = (fontSize * songLyrics.clientWidth / (widestLine + 1)) + 'px';
+            }
+        }
+
+        fitSongLyrics();
+        window.addEventListener('resize', fitSongLyrics);
+        document.fonts.ready.then(fitSongLyrics);
+    }
+
     function isSnowSeason() {
         const now = new Date();
         return (now.getMonth() === 10 && now.getDate() >= 15) || now.getMonth() === 11;
