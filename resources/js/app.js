@@ -85,6 +85,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const snowPreferenceKey = 's0ng.snow.enabled';
 
     if (snowToggle && snowEffect && snowShovel) {
+        const visualViewport = window.visualViewport;
+
+        if (visualViewport) {
+            function positionSnowAtViewportBottom() {
+                const bottom = window.innerHeight - visualViewport.height - visualViewport.offsetTop;
+                snowEffect.style.bottom = bottom + 'px';
+                snowShovel.style.bottom = bottom + 'px';
+            }
+
+            positionSnowAtViewportBottom();
+            visualViewport.addEventListener('resize', positionSnowAtViewportBottom);
+            visualViewport.addEventListener('scroll', positionSnowAtViewportBottom);
+            window.addEventListener('resize', positionSnowAtViewportBottom);
+        }
+
         const savedPreference = window.localStorage.getItem(snowPreferenceKey);
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const pileHeight = 60;
