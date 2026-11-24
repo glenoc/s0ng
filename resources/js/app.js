@@ -85,21 +85,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const snowPreferenceKey = 's0ng.snow.enabled';
 
     if (snowToggle && snowEffect && snowShovel) {
-        const visualViewport = window.visualViewport;
-
-        if (visualViewport) {
-            function positionSnowAtViewportBottom() {
-                const bottom = window.innerHeight - visualViewport.height - visualViewport.offsetTop;
-                snowEffect.style.bottom = bottom + 'px';
-                snowShovel.style.bottom = bottom + 'px';
-            }
-
-            positionSnowAtViewportBottom();
-            visualViewport.addEventListener('resize', positionSnowAtViewportBottom);
-            visualViewport.addEventListener('scroll', positionSnowAtViewportBottom);
-            window.addEventListener('resize', positionSnowAtViewportBottom);
-        }
-
         const savedPreference = window.localStorage.getItem(snowPreferenceKey);
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const pileHeight = 60;
@@ -116,6 +101,24 @@ document.addEventListener('DOMContentLoaded', function () {
         let gripOffset = 0;
         let keyboardIndex = 0;
         let shovelLoad = 0;
+
+        const visualViewport = window.visualViewport;
+
+        if (visualViewport) {
+            function positionSnowAtViewportBottom() {
+                const bottom = window.innerHeight - visualViewport.height - visualViewport.offsetTop;
+                snowEffect.style.bottom = bottom + 'px';
+                snowShovel.style.bottom = bottom + 'px';
+                if (canvas) {
+                    canvas.style.bottom = bottom + 'px';
+                }
+            }
+
+            positionSnowAtViewportBottom();
+            visualViewport.addEventListener('resize', positionSnowAtViewportBottom);
+            visualViewport.addEventListener('scroll', positionSnowAtViewportBottom);
+            window.addEventListener('resize', positionSnowAtViewportBottom);
+        }
 
         function settleSnow() {
             if (!pile || shovelLoad === 0) {
@@ -207,7 +210,9 @@ document.addEventListener('DOMContentLoaded', function () {
         function startPile() {
             canvas = document.createElement('canvas');
             canvas.className = 'snow-pile';
-            snowEffect.appendChild(canvas);
+            canvas.setAttribute('aria-hidden', 'true');
+            canvas.style.bottom = snowShovel.style.bottom;
+            snowEffect.after(canvas);
             resizePile();
             positionShovel(Math.floor(pile.length * 0.96));
             snowShovel.style.left = '96%';
@@ -241,6 +246,9 @@ document.addEventListener('DOMContentLoaded', function () {
             tiltShovel(0);
             snowShovel.hidden = !seasonActive || !snowEnabled || reducedMotion.matches;
             snowEffect.replaceChildren();
+            if (canvas) {
+                canvas.remove();
+            }
             canvas = null;
             pile = null;
             pileProfile = null;
