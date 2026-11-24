@@ -1,0 +1,17 @@
+{
+  "resources/js/app.js": {
+    "file": "assets/app-BeVI6_-I.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-Do2SgH5n.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/sass/app.scss",
+    "isEntry": true
+  }
+}

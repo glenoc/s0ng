@@ -1,6 +1,4 @@
-window.$ = window.jQuery = require('jquery');
-window.Popper = require('popper.js');
-require('bootstrap');
+import 'bootstrap';
 
 document.addEventListener('DOMContentLoaded', function () {
     function isSnowSeason() {
