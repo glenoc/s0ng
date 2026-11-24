@@ -71,6 +71,32 @@
             </div>
         </nav>
         <div id="snow-effect" aria-hidden="true"></div>
+        <button id="snow-shovel" class="snow-shovel" type="button" aria-label="Sneskraber: træk for at skubbe sneen" aria-describedby="snow-shovel-help" hidden>
+            <svg viewBox="0 0 52 72" aria-hidden="true">
+                <defs>
+                    <linearGradient id="shovel-handle" x1="0" y1="0" x2="1" y2="0">
+                        <stop stop-color="#a96b35"/>
+                        <stop offset=".45" stop-color="#f0c482"/>
+                        <stop offset="1" stop-color="#b7793e"/>
+                    </linearGradient>
+                    <linearGradient id="shovel-blade" x1="0" y1="0" x2="1" y2="1">
+                        <stop stop-color="#ff5144"/>
+                        <stop offset=".5" stop-color="#e61516"/>
+                        <stop offset="1" stop-color="#a90d10"/>
+                    </linearGradient>
+                </defs>
+                <path d="M24 13h4v35h-4z" fill="url(#shovel-handle)" stroke="#a76b35" stroke-width=".5"/>
+                <path d="M16 2h20l-1 5q-1 6-6 8h-6q-5-2-6-8zm4 3 .6 2q.6 3 3.4 4.5h4q2.8-1.5 3.4-4.5l.6-2z" fill="url(#shovel-blade)" fill-rule="evenodd" stroke="#9e1010" stroke-width="1" stroke-linejoin="round"/>
+                <path d="M18 3h16" stroke="#ff9a89" stroke-width=".8" stroke-linecap="round"/>
+                <path d="M10 48h32q3 0 4 4l3 14q.5 4-3 4H6q-3.5 0-3-4l3-14q1-4 4-4z" fill="url(#shovel-blade)" stroke="#971010" stroke-width="1.5"/>
+                <path d="M10 51h32M11 54 9 65m9-11-1 11m17-11 1 11m6-11 2 11" fill="none" stroke="#ff8d78" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+                <path d="M22 46h8v12q0 3-4 5-4-2-4-5z" fill="#c41013" stroke="#a40d11" stroke-width=".8"/>
+                <circle cx="26" cy="50" r="1" fill="#e1e4dc"/>
+                <circle cx="26" cy="54" r=".8" fill="#e1e4dc"/>
+                <path d="M6 68h40" stroke="#ff9b83" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+            </svg>
+        </button>
+        <span id="snow-shovel-help" class="visually-hidden">Træk sneskraberen med mus eller finger, eller brug venstre og højre piletast til at skubbe sneen.</span>
         <div
             id="song-start-notifications"
             class="container position-fixed top-0 start-50 translate-middle-x mt-3"
