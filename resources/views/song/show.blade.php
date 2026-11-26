@@ -40,6 +40,14 @@
         width: 2.5rem;
     }
 
+    .song-autoscroll {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background: var(--bs-body-bg);
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
     #songdiv {
         padding-bottom: 50vh;
     }
@@ -111,6 +119,26 @@
                     data-help="{{ __('ui.chord_diagram_help') }}"></div>
             @endauth
         </div>
+        @auth
+            <div id="song-autoscroll" class="song-autoscroll p-2" hidden
+                data-save-url="{{ route('song.autoscroll', $song) }}"
+                data-start="{{ __('ui.autoscroll_start') }}"
+                data-stop="{{ __('ui.autoscroll_stop') }}"
+                data-saving="{{ __('ui.autoscroll_saving') }}"
+                data-saved="{{ __('ui.autoscroll_saved') }}"
+                data-error="{{ __('ui.autoscroll_error') }}"
+                data-wake-error="{{ __('ui.autoscroll_wake_error') }}">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button id="autoscroll-toggle" class="btn btn-sm btn-outline-secondary" type="button" aria-pressed="false">{{ __('ui.autoscroll_start') }}</button>
+                    <label for="autoscroll-speed">{{ __('ui.autoscroll_speed') }}</label>
+                    <input id="autoscroll-speed" type="range" min="1" max="100" step="1" value="{{ $autoscrollSpeed ?? 20 }}">
+                    <output id="autoscroll-speed-value" for="autoscroll-speed"></output>
+                    <button id="autoscroll-retry" class="btn btn-sm btn-outline-danger" type="button" hidden>{{ __('ui.autoscroll_retry') }}</button>
+                </div>
+                <div id="autoscroll-status" role="status" aria-live="polite"></div>
+                <div id="autoscroll-wake-status" role="status" aria-live="polite"></div>
+            </div>
+        @endauth
         <div class="card-body p-1">
             <div id="song-lyrics">
                 @foreach ($lines as $line)

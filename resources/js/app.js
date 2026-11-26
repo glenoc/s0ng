@@ -5,6 +5,154 @@ import { assessPlayability, extractChords, findCapo, formatCapoLine, transposeCh
 import { guitarDiagramStart, guitarVoicing } from './guitar-chords.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const autoscroll = document.getElementById('song-autoscroll');
+    if (autoscroll) {
+        const toggle = document.getElementById('autoscroll-toggle');
+        const speed = document.getElementById('autoscroll-speed');
+        const speedValue = document.getElementById('autoscroll-speed-value');
+        const status = document.getElementById('autoscroll-status');
+        const wakeStatus = document.getElementById('autoscroll-wake-status');
+        const retry = document.getElementById('autoscroll-retry');
+        let running = false;
+        let frame;
+        let previousTime;
+        let remainder = 0;
+        let wakeLock = null;
+        let wakeRequest = 0;
+        let saving = false;
+        let queuedSpeed = null;
+
+        async function acquireWakeLock(request) {
+            if (!('wakeLock' in navigator)) {
+                wakeStatus.textContent = autoscroll.dataset.wakeError;
+                return;
+            }
+            try {
+                const lock = await navigator.wakeLock.request('screen');
+                if (!running || request !== wakeRequest) {
+                    await lock.release();
+                    return;
+                }
+                wakeLock = lock;
+                lock.addEventListener('release', function () {
+                    if (wakeLock === lock) {
+                        wakeLock = null;
+                        if (running) {
+                            wakeStatus.textContent = autoscroll.dataset.wakeError;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Could not keep the screen awake:', error);
+                if (running && request === wakeRequest) {
+                    wakeStatus.textContent = autoscroll.dataset.wakeError;
+                }
+            }
+        }
+
+        function stopAutoscroll() {
+            running = false;
+            window.cancelAnimationFrame(frame);
+            toggle.textContent = autoscroll.dataset.start;
+            toggle.setAttribute('aria-pressed', 'false');
+            wakeStatus.textContent = '';
+            wakeRequest += 1;
+            if (wakeLock) {
+                const lock = wakeLock;
+                wakeLock = null;
+                lock.release().catch(error => console.error('Could not release the screen wake lock:', error));
+            }
+        }
+
+        function scrollFrame(time) {
+            if (!running) {
+                return;
+            }
+            if (previousTime !== undefined) {
+                remainder += Math.min(time - previousTime, 100) * Number(speed.value) / 1000;
+                // Avoid losing a pixel to floating-point rounding.
+                const pixels = Math.floor(remainder + 1e-7);
+                if (pixels > 0) {
+                    window.scrollBy({ top: pixels, behavior: 'instant' });
+                    remainder = Math.max(0, remainder - pixels);
+                }
+            }
+            previousTime = time;
+            if (window.scrollY >= document.documentElement.scrollHeight - window.innerHeight - 1) {
+                stopAutoscroll();
+            } else {
+                frame = window.requestAnimationFrame(scrollFrame);
+            }
+        }
+
+        toggle.addEventListener('click', function () {
+            if (running) {
+                stopAutoscroll();
+                return;
+            }
+            running = true;
+            previousTime = undefined;
+            remainder = 0;
+            toggle.textContent = autoscroll.dataset.stop;
+            toggle.setAttribute('aria-pressed', 'true');
+            wakeStatus.textContent = '';
+            acquireWakeLock(++wakeRequest);
+            frame = window.requestAnimationFrame(scrollFrame);
+        });
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && running) {
+                stopAutoscroll();
+            }
+        });
+
+        async function saveSpeed() {
+            queuedSpeed = Number(speed.value);
+            if (saving) {
+                return;
+            }
+            saving = true;
+            status.textContent = autoscroll.dataset.saving;
+            retry.hidden = true;
+            while (queuedSpeed !== null) {
+                const value = queuedSpeed;
+                queuedSpeed = null;
+                try {
+                    const response = await fetch(autoscroll.dataset.saveUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({ speed: value }),
+                        keepalive: true
+                    });
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                } catch (error) {
+                    console.error('Could not save autoscroll speed:', error);
+                    if (queuedSpeed === null) {
+                        status.textContent = autoscroll.dataset.error;
+                        retry.hidden = false;
+                        saving = false;
+                        return;
+                    }
+                }
+            }
+            status.textContent = autoscroll.dataset.saved;
+            saving = false;
+        }
+
+        speed.addEventListener('input', function () {
+            speedValue.textContent = speed.value;
+        });
+        speed.addEventListener('change', saveSpeed);
+        retry.addEventListener('click', saveSpeed);
+        speedValue.textContent = speed.value;
+        autoscroll.hidden = false;
+    }
+
     const shareQrToggle = document.getElementById('share-qr-toggle');
     const shareQrModal = document.getElementById('share-qr-modal');
     if (shareQrToggle && shareQrModal) {
