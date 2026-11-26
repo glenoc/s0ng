@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>S0ng</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -66,6 +67,12 @@
                         <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false" data-snow-on="{{ __('ui.snow_on') }}" data-snow-off="{{ __('ui.snow_off') }}" data-snow-season="{{ __('ui.snow_season') }}" hidden>
                             {{ __('ui.snow_off') }}
                         </button>
+                        <button id="share-qr-toggle" class="btn song-auth-button" type="button" data-bs-toggle="modal" data-bs-target="#share-qr-modal" aria-label="{{ __('ui.share_qr') }}" hidden>
+                            <svg class="d-inline-block align-middle" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm10-2h3v3h-3v-3zm5 0h3v5h-3v-5zm-5 5h3v3h-3v-3zm5 2h3v1h-3v-1z"/>
+                            </svg>
+                            {{ __('ui.share') }}
+                        </button>
                         @auth
                             <a class="btn song-auth-button" href="{{ route('users.edit', auth()->user()) }}">{{ __('ui.my_profile') }}</a>
                             <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
@@ -78,6 +85,21 @@
                 </div>
             </div>
         </nav>
+        <div class="modal fade" id="share-qr-modal" tabindex="-1" aria-labelledby="share-qr-title" aria-hidden="true" data-error="{{ __('ui.share_qr_error') }}">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="share-qr-title">{{ __('ui.share_qr') }}</h2>
+                        <button type="button" class="btn btn-outline-secondary btn-sm ms-auto" data-bs-dismiss="modal" aria-label="{{ __('ui.close') }}">&times;</button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>{{ __('ui.share_qr_help') }}</p>
+                        <canvas id="share-qr-canvas" role="img" aria-label="{{ __('ui.share_qr') }}" hidden></canvas>
+                        <p id="share-qr-error" class="text-danger" role="alert" hidden></p>
+                    </div>
+                </div>
+            </div>
+        </div>
         @auth
             <div id="song-playability-config" hidden
                 data-chords="{{ json_encode(auth()->user()->known_chords ?? []) }}"

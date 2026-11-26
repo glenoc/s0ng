@@ -1,9 +1,31 @@
 import 'bootstrap';
+import QRCode from 'qrcode';
 import { addSnow, createSnowPile, createSnowProfile, depositSnow, pushSnow } from './snow-pile.mjs';
 import { assessPlayability, extractChords, findCapo, formatCapoLine, transposeChordLine } from './transposition.mjs';
 import { guitarDiagramStart, guitarVoicing } from './guitar-chords.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const shareQrToggle = document.getElementById('share-qr-toggle');
+    const shareQrModal = document.getElementById('share-qr-modal');
+    if (shareQrToggle && shareQrModal) {
+        const canvas = document.getElementById('share-qr-canvas');
+        const errorMessage = document.getElementById('share-qr-error');
+        shareQrModal.addEventListener('show.bs.modal', function () {
+            canvas.hidden = true;
+            errorMessage.hidden = true;
+            QRCode.toCanvas(canvas, window.location.href, { width: 256, margin: 4 }, function (error) {
+                if (error) {
+                    console.error('Could not generate the share QR code:', error);
+                    errorMessage.textContent = shareQrModal.dataset.error;
+                    errorMessage.hidden = false;
+                } else {
+                    canvas.hidden = false;
+                }
+            });
+        });
+        shareQrToggle.hidden = false;
+    }
+
     const notationReview = document.getElementById('notation-review');
     if (notationReview) {
         let count = 0;
