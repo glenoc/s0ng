@@ -96,8 +96,11 @@ class SongController extends Controller
             $transposition = Auth::check()
                 ? DB::table('song_transpositions')->where('user_id', Auth::id())->where('song_id', $song->id)->first()
                 : null;
+            $autoscrollSpeed = Auth::check()
+                ? DB::table('song_autoscroll_preferences')->where('user_id', Auth::id())->where('song_id', $song->id)->value('speed')
+                : null;
 
-            return view('song.show', ['song' => $song, 'lines' => $lines, 'transposition' => $transposition]);
+            return view('song.show', ['song' => $song, 'lines' => $lines, 'transposition' => $transposition, 'autoscrollSpeed' => $autoscrollSpeed]);
         }
 
         public function saveTransposition(Request $request, Song $song)
@@ -114,6 +117,21 @@ class SongController extends Controller
             );
 
             return redirect()->route('song.show', $song);
+        }
+
+        public function saveAutoscroll(Request $request, Song $song)
+        {
+            $validated = $request->validate([
+                'speed' => 'required|integer|between:1,100',
+            ]);
+
+            DB::table('song_autoscroll_preferences')->upsert(
+                [['user_id' => $request->user()->id, 'song_id' => $song->id, 'speed' => $validated['speed'], 'updated_at' => now(), 'created_at' => now()]],
+                ['user_id', 'song_id'],
+                ['speed', 'updated_at']
+            );
+
+            return response()->noContent();
         }
 
         /**
