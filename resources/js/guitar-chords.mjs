@@ -39,11 +39,12 @@ export function guitarVoicing(symbol) {
     if (!chord) {
         return null;
     }
-    const formula = intervals[chord.quality.replace(/[()]/g, '')];
+    const normalizedQuality = chord.quality.replace(/[()]/g, '').replace(/^(?:o(?=$|[0-9(])|°)/, 'dim');
+    const formula = intervals[normalizedQuality];
     if (!formula) {
         return null;
     }
-    const quality = chord.quality.replace(/^min/, 'm');
+    const quality = normalizedQuality.replace(/^min/, 'm');
     const simple = chord.bass === chord.root && simpleVoicings[chord.root + ':' + quality];
     if (simple) {
         return simple.slice();

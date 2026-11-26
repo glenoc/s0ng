@@ -47,7 +47,9 @@
                             <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">{{ __('ui.artists') }}</a>
                         </li>
                         @can('isSuperAdmin')
-                            <li class="nav-item">
+                            <li id="notation-review-nav" class="nav-item" hidden
+                                data-url="{{ route('admin.song-notation.data') }}"
+                                data-error="{{ __('ui.notation_review_check_error') }}">
                                 <a @class(['nav-link', 'active' => request()->routeIs('admin.song-notation')]) href="{{ route('admin.song-notation') }}">{{ __('ui.notation_review') }}</a>
                             </li>
                         @endcan

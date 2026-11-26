@@ -101,7 +101,7 @@ class UserController extends Controller
             'known_chords.*' => 'required|string|max:80',
         ]);
         $chords = $validated['known_chords'] ?? [];
-        $pattern = '/^[A-G][#b♯♭]?(?:(?:m|min|maj|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°ø-]|\([^)]*\))*)(?:\/[A-G][#b♯♭]?)?$/u';
+        $pattern = '/^[A-GH][#b♯♭]?(?:(?:m|min|maj|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°øo-]|\([^)]*\))*)(?:\/[A-GHa-gh][#b♯♭]?)?$/u';
         foreach ($chords as $chord) {
             if (!preg_match($pattern, $chord)) {
                 throw ValidationException::withMessages(['known_chords' => __('ui.invalid_chord', ['chord' => $chord])]);

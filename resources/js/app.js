@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
         shareQrToggle.hidden = false;
     }
 
+    const notationReviewNav = document.getElementById('notation-review-nav');
     const notationReview = document.getElementById('notation-review');
     if (notationReview) {
         let count = 0;
@@ -215,6 +216,26 @@ document.addEventListener('DOMContentLoaded', function () {
         notationReview.querySelector('[role=status]').textContent = count
             ? notationReview.dataset.count.replace(':count', String(count))
             : notationReview.dataset.empty;
+        if (notationReviewNav) {
+            notationReviewNav.hidden = count === 0;
+        }
+    } else if (notationReviewNav) {
+        fetch(notationReviewNav.dataset.url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(songs => {
+                notationReviewNav.hidden = !songs.some(lines => assessPlayability(lines, ['C']).status === 'unknown');
+            })
+            .catch(error => {
+                console.error('Could not check song notation:', error);
+                const link = notationReviewNav.querySelector('a');
+                link.textContent += ' (' + notationReviewNav.dataset.error + ')';
+                notationReviewNav.hidden = false;
+            });
     }
 
     const knownChordsForm = document.getElementById('known-chords-form');

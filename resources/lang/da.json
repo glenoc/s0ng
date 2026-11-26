@@ -81,6 +81,7 @@
     "ui.notation_review": "Gennemgå akkordnotation",
     "ui.notation_review_help": "Sange, der ikke kan vurderes, uanset dine egne akkorder. Ret sangen, eller gennemgå den notation, der ikke genkendes.",
     "ui.notation_review_loading": "Undersøger sangene …",
+    "ui.notation_review_check_error": "Kunne ikke undersøge sangene",
     "ui.notation_review_requires_javascript": "Slå JavaScript til for at gennemgå akkordnotationen.",
     "ui.notation_review_empty": "Alle sange kan vurderes.",
     "ui.notation_review_count": "Sange, der ikke kan vurderes: :count",

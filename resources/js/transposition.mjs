@@ -1,11 +1,12 @@
 const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-const notes = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const notes = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11, H: 11 };
 const capoPattern = /^([ \t]*capo[ \t]*[:.]?[ \t]*)(\d+)(?:[ \t]*\.[ \t]*)?(?:st|nd|rd|th)?\.?(?:[ \t]*(?:fret|bånd))?/i;
-const chordPattern = /^([A-G])([#b♯♭]?)((?:min|maj|m|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°ø-]|\([^)]*\))*)(?:\/([A-G])([#b♯♭]?))?$/;
-const chordSequencePattern = new RegExp(chordPattern.source.slice(1, -1) + "([*'’!]*)", 'gy');
-const sectionPattern = /\[(?:intro|outro|verse|vers|chorus|omkvæd|refrain|bridge|bro|break|interlude|mellemspil|instrumental|solo|pre[- ]chorus)(?:\s+\d+)?\]/gi;
-const repeatPattern = /(^|[\s|,\[\]])\(\s*(?:x\s*\d+|\d+\s*x)\s*\)(?=$|[\s|,\[\]])/gi;
+const chordPattern = /^([A-GH])([#b♯♭]?)((?:min|maj|m|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°øo-]|\([^)]*\))*)(?:\/([A-GHa-gh])([#b♯♭]?))?$/;
+const chordSequencePattern = new RegExp(chordPattern.source.slice(1, -1) + "([*'’!`]*)", 'gy');
+const sectionPattern = /\[(?:intro|outro|verse|vers|chorus|omkvæd|refrain|bridge|bro|break|interlude|mellemspil|instrumental|solo|harmonies|pre[- ]chorus)(?:\s+\d+)?\]/gi;
+const repeatPattern = /(^|[\s|,\[\]])(?:\(\s*(?:x\s*\d+|\d+\s*x)\s*\)|x\s*\d+|\d+\s*x)(?=$|[\s|,\[\]])/gi;
+const directionPattern = /\(\s*(?:break|fade\s+out)\s*\)/gi;
 const notationExplanationPattern = /\(\s*['’*!=%]\s*=\s*[^)]*\)/g;
 
 export function findCapo(lines) {
@@ -20,13 +21,13 @@ export function findCapo(lines) {
 
 function transposeNote(note, accidental, semitones) {
     const alteration = accidental === '#' || accidental === '♯' ? 1 : accidental === 'b' || accidental === '♭' ? -1 : 0;
-    const pitch = ((notes[note] + alteration + semitones) % 12 + 12) % 12;
+    const pitch = ((notes[note.toUpperCase()] + alteration + semitones) % 12 + 12) % 12;
     return (accidental === 'b' || accidental === '♭' ? flatNotes : sharpNotes)[pitch];
 }
 
 function chordToken(token) {
     let prefix = '';
-    const decoration = token.match(/[*'’!]+$/)?.[0] || '';
+    const decoration = token.match(/[*'’!`]+$/)?.[0] || '';
     let suffix = decoration;
     token = token.slice(0, token.length - decoration.length);
     while (token.startsWith('(') && token.endsWith(')')) {
@@ -48,7 +49,9 @@ function chordToken(token) {
 
 function isInstructionLine(line) {
     if (/^\s*original\s+key\s*[:.]?\s*[A-G][#b♯♭]?(?:m|min|maj)?\s*$/i.test(line)
-        || /^\s*\(\s*transpose\b[^)]*\)\s*$/i.test(line)) {
+        || /^\s*\(\s*transpose\b[^)]*\)\s*$/i.test(line)
+        || /^\s*tuning\s*:\s*standard\s*$/i.test(line)
+        || /^\s*(?:intro|solo)\s*:?\s*$/i.test(line)) {
         return true;
     }
     if (!/^\s*(?:[A-Za-z][a-z]+[ \t]+){3,}[A-Za-z][a-z]+[.!?]?\s*$/.test(line)) {
@@ -59,7 +62,7 @@ function isInstructionLine(line) {
 
 function pitch(note, accidental) {
     const alteration = accidental === '#' || accidental === '♯' ? 1 : accidental === 'b' || accidental === '♭' ? -1 : 0;
-    return (notes[note] + alteration + 12) % 12;
+    return (notes[note.toUpperCase()] + alteration + 12) % 12;
 }
 
 export function parseChord(token) {
@@ -75,7 +78,7 @@ export function parseChord(token) {
 }
 
 function chordKey(chord) {
-    return pitch(chord[1], chord[2]) + ':' + chord[3].replace(/^min/, 'm')
+    return pitch(chord[1], chord[2]) + ':' + chord[3].replace(/^min/, 'm').replace(/^(?:o(?=$|[0-9(])|°)/, 'dim')
         + (chord[4] ? '/' + pitch(chord[4], chord[5]) : '');
 }
 
@@ -86,14 +89,15 @@ export function extractChords(lines) {
         if (capoPattern.test(line) || isInstructionLine(line)) {
             return;
         }
-        const notation = line.replace(sectionPattern, ' ').replace(repeatPattern, ' ').replace(notationExplanationPattern, ' ');
+        const notation = line.replace(sectionPattern, ' ').replace(repeatPattern, '$1 ')
+            .replace(directionPattern, ' ').replace(notationExplanationPattern, ' ');
         for (const match of notation.matchAll(/[^\s|,\[\]]+/g)) {
             const parsed = chordToken(match[0]);
             if (parsed.parts.length) {
                 parsed.parts.forEach(function (part) {
                     chords.set(chordKey(part.chord), chords.get(chordKey(part.chord)) || part.token);
                 });
-            } else if (!/^[-.:/!]+$/.test(match[0]) && !/^(?:N\.?C\.?|%|break)$/i.test(match[0])) {
+            } else if (!/^[-.:/!_]+$/.test(match[0]) && !/^(?:N\.?C\.?|%|break)$/i.test(match[0])) {
                 unknown.push(match[0]);
             }
         }
