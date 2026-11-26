@@ -27,6 +27,11 @@ class SongController extends Controller
         return view('song.notation-review', ['songs' => $songs]);
     }
 
+    public function notationReviewData()
+    {
+        return response()->json(Song::select('text')->get()->map(fn ($song) => $song->chordNotation()));
+    }
+
     public function search(Request $request){
         $request->validate(['search' => 'required|string|max:80']);
         $songs = Song::with('artist')->where('name', 'like', '%'.$request->search.'%')->orderBy('name')->get();
