@@ -225,14 +225,46 @@ body[data-theme='christmas'] .song-search-button:focus-visible {
     left: 96%;
     bottom: 0;
     z-index: 1040;
-    width: 52px;
-    height: 72px;
+    width: var(--tool-width, 42px);
+    height: var(--tool-height, 60px);
     padding: 0;
     border: 0;
     background: transparent;
     transform: translateX(-50%);
     cursor: grab;
     touch-action: none;
+}
+
+.snow-game {
+    position: fixed;
+    left: 0.5rem;
+    bottom: 100px;
+    z-index: 1040;
+    max-width: min(250px, 70vw);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #b5c5ce;
+    border-radius: 0.5rem;
+    background: rgba(245, 251, 255, 0.9);
+    color: #172b3a;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.snow-game summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.snow-game summary:focus-visible {
+    outline: 2px solid #426b87;
+    outline-offset: 2px;
+}
+
+.snow-game progress {
+    display: block;
+    width: 100%;
+    height: 0.5rem;
+    accent-color: #2563a6;
 }
 
 .snow-shovel:active {
@@ -251,6 +283,105 @@ body[data-theme='christmas'] .song-search-button:focus-visible {
     transform: rotate(var(--shovel-tilt, 0deg));
     transform-origin: 50% 95%;
     transition: transform 150ms ease;
+}
+
+.snow-shovel svg[data-tool="plow"],
+.snow-shovel svg[data-tool="blower"] {
+    transform: scaleX(var(--tool-direction, 1));
+    transition: none;
+}
+
+.snow-shovel svg[data-tool="blower"] {
+    overflow: visible;
+}
+
+.snow-spray {
+    pointer-events: none;
+}
+
+.snow-spray > g {
+    opacity: 0;
+}
+
+.snow-shovel[data-snow-blow] .snow-auger {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: snow-auger-spin 0.6s linear infinite;
+}
+
+.snow-shovel[data-snow-blow] .snow-spray-light,
+.snow-shovel[data-snow-blow="medium"] .snow-spray-medium,
+.snow-shovel[data-snow-blow="heavy"] .snow-spray-medium,
+.snow-shovel[data-snow-blow="heavy"] .snow-spray-heavy {
+    opacity: 1;
+}
+
+.snow-shovel[data-snow-blow] .snow-spray circle {
+    animation: snow-spray 0.9s linear infinite;
+    animation-delay: calc(var(--particle-delay, 0s) + var(--cluster-delay, 0s));
+}
+
+.snow-spray circle:nth-child(1) {
+    --spray-x: 50px;
+    --spray-y: -50px;
+}
+
+.snow-spray circle:nth-child(2) {
+    --spray-x: 58px;
+    --spray-y: -40px;
+    --particle-delay: -0.15s;
+}
+
+.snow-spray circle:nth-child(3) {
+    --spray-x: 40px;
+    --spray-y: -58px;
+    --particle-delay: -0.3s;
+}
+
+.snow-spray circle:nth-child(4) {
+    --spray-x: 65px;
+    --spray-y: -35px;
+    --particle-delay: -0.45s;
+}
+
+.snow-spray circle:nth-child(5) {
+    --spray-x: 35px;
+    --spray-y: -62px;
+    --particle-delay: -0.6s;
+}
+
+.snow-spray circle:nth-child(6) {
+    --spray-x: 55px;
+    --spray-y: -55px;
+    --particle-delay: -0.75s;
+}
+
+.snow-spray-medium {
+    --cluster-delay: -0.05s;
+}
+
+.snow-spray-heavy {
+    --cluster-delay: -0.1s;
+}
+
+@keyframes snow-auger-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes snow-spray {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--spray-x), var(--spray-y));
+    }
 }
 
 .snowflake {
@@ -279,7 +410,8 @@ body[data-theme='christmas'] .song-search-button:focus-visible {
 
     #snow-effect,
     .snow-pile,
-    .snow-shovel {
+    .snow-shovel,
+    .snow-game {
         display: none;
     }
 }

@@ -329,16 +329,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const snowToggle = document.getElementById('snow-toggle');
     const snowShovel = document.getElementById('snow-shovel');
     const snowEffect = document.getElementById('snow-effect');
+    const snowGame = document.getElementById('snow-game');
     const snowPreferenceKey = 's0ng.snow.enabled';
+    const snowProgressKey = 's0ng.snow.cleared.v2';
 
-    if (snowToggle && snowEffect && snowShovel) {
+    if (snowToggle && snowEffect && snowShovel && snowGame) {
         const savedPreference = window.localStorage.getItem(snowPreferenceKey);
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const pileHeight = 60;
-        const shovelCapacity = 180;
+        const tools = [
+            { name: 'small', threshold: 0, capacity: 90, width: 42, height: 60 },
+            { name: 'large', threshold: 1500, capacity: 180, width: 56, height: 72 },
+            { name: 'scraper', threshold: 5000, capacity: 360, width: 88, height: 70 },
+            { name: 'plow', threshold: 13000, capacity: 720, width: 148, height: 88 },
+            { name: 'blower', threshold: 30000, capacity: 1440, width: 168, height: 96 }
+        ];
+        let progressValue = window.localStorage.getItem(snowProgressKey);
+        if (progressValue === null) {
+            const previousProgress = Number(window.localStorage.getItem('s0ng.snow.cleared'));
+            if (Number.isFinite(previousProgress) && previousProgress > 0 && Number.isFinite(previousProgress * 10)) {
+                progressValue = String(previousProgress * 10);
+                window.localStorage.setItem(snowProgressKey, progressValue);
+            }
+        }
+        const savedProgress = Number(progressValue);
+        let clearedSnow = Number.isFinite(savedProgress) && savedProgress > 0 ? savedProgress : 0;
+        let toolIndex = 0;
 
         let seasonActive = isSnowSeason();
-        let snowEnabled = seasonActive && savedPreference !== 'false';
+        let snowEnabled = seasonActive && (!canToggleSnow() || savedPreference !== 'false');
         let pile;
         let pileProfile;
         let canvas;
@@ -348,6 +367,97 @@ document.addEventListener('DOMContentLoaded', function () {
         let gripOffset = 0;
         let keyboardIndex = 0;
         let shovelLoad = 0;
+        let pushDirection = 1;
+        let blowerTimer;
+
+        function canToggleSnow() {
+            return snowGame.dataset.authenticated === 'true' || clearedSnow >= tools[tools.length - 1].threshold;
+        }
+
+        function updateSnowToggle() {
+            snowToggle.hidden = !canToggleSnow();
+            snowToggle.disabled = !seasonActive;
+            snowToggle.textContent = seasonActive
+                ? (snowEnabled ? snowToggle.dataset.snowOn : snowToggle.dataset.snowOff)
+                : snowToggle.dataset.snowSeason;
+            snowToggle.setAttribute('aria-pressed', String(snowEnabled));
+        }
+
+        function updateSnowGame(announce = false) {
+            const previousTool = toolIndex;
+            toolIndex = tools.findIndex((tool, index) => !tools[index + 1] || clearedSnow < tools[index + 1].threshold);
+            const tool = tools[toolIndex];
+            const next = tools[toolIndex + 1];
+            const name = snowGame.dataset[tool.name];
+            snowGame.querySelector('#snow-game-tool').textContent = name;
+            snowShovel.setAttribute('aria-label', name);
+            snowShovel.style.setProperty('--tool-width', tool.width + 'px');
+            snowShovel.style.setProperty('--tool-height', tool.height + 'px');
+            snowShovel.querySelectorAll('[data-tool]').forEach(icon => {
+                icon.toggleAttribute('hidden', icon.dataset.tool !== tool.name);
+            });
+            const progress = snowGame.querySelector('#snow-game-progress');
+            const meter = snowGame.querySelector('#snow-game-meter');
+            meter.hidden = !next;
+            snowGame.hidden = snowShovel.hidden || !next;
+            updateSnowToggle();
+            if (next) {
+                progress.textContent = snowGame.dataset.next
+                    .replace(':tool', snowGame.dataset[next.name])
+                    .replace(':current', String(Math.floor(clearedSnow - tool.threshold)))
+                    .replace(':target', String(next.threshold - tool.threshold));
+                meter.max = next.threshold - tool.threshold;
+                meter.value = clearedSnow - tool.threshold;
+            }
+            if (announce && previousTool !== toolIndex) {
+                document.getElementById('snow-game-announcement').textContent = snowGame.dataset.unlocked.replace(':tool', name);
+                if (next) {
+                    snowGame.querySelector('#snow-game-details').open = true;
+                }
+            }
+            if (pile && previousTool !== toolIndex) {
+                positionShovel(keyboardIndex);
+            }
+        }
+
+        function moveSnow(from, to) {
+            const tool = tools[toolIndex];
+            const result = pushSnow(pile, from, to, tool.capacity, shovelLoad, tool.name === 'blower');
+            shovelLoad = result.load;
+            if (from !== to && tool.name === 'blower') {
+                if (result.cleared > 0) {
+                    const cells = Math.abs(to - from) + (to === 0 || to === pile.length - 1 ? 1 : 0);
+                    const density = result.cleared / cells;
+                    snowShovel.dataset.snowBlow = density < 10 ? 'light' : density < 30 ? 'medium' : 'heavy';
+                    window.clearTimeout(blowerTimer);
+                    blowerTimer = window.setTimeout(stopBlowing, 250);
+                } else {
+                    stopBlowing();
+                }
+            }
+            if (result.cleared > 0) {
+                clearedSnow += result.cleared;
+                window.localStorage.setItem(snowProgressKey, String(clearedSnow));
+                updateSnowGame(true);
+            }
+        }
+
+        function stopBlowing() {
+            window.clearTimeout(blowerTimer);
+            delete snowShovel.dataset.snowBlow;
+        }
+
+        updateSnowGame();
+
+        window.addEventListener('storage', function (event) {
+            if (event.key === snowProgressKey && event.newValue !== null) {
+                const progress = Number(event.newValue);
+                if (Number.isFinite(progress) && progress > clearedSnow) {
+                    clearedSnow = progress;
+                    updateSnowGame(true);
+                }
+            }
+        });
 
         const visualViewport = window.visualViewport;
 
@@ -356,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const bottom = window.innerHeight - visualViewport.height - visualViewport.offsetTop;
                 snowEffect.style.bottom = bottom + 'px';
                 snowShovel.style.bottom = bottom + 'px';
+                snowGame.style.bottom = (bottom + 100) + 'px';
                 if (canvas) {
                     canvas.style.bottom = bottom + 'px';
                 }
@@ -371,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!pile || shovelLoad === 0) {
                 return;
             }
-            shovelLoad = depositSnow(pile, keyboardIndex, shovelLoad, pileHeight);
+            shovelLoad = depositSnow(pile, moundIndex(), shovelLoad, pileHeight);
             if (shovelLoad > 0) {
                 throw new Error('Could not deposit all snow from the shovel.');
             }
@@ -380,11 +491,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function positionShovel(index) {
             keyboardIndex = index;
-            snowShovel.style.left = ((index + 0.5) / pile.length * 100) + '%';
+            const halfWidth = tools[toolIndex].width / 2;
+            const center = (index + 0.5) / pile.length * window.innerWidth;
+            snowShovel.style.left = Math.max(halfWidth, Math.min(window.innerWidth - halfWidth, center)) + 'px';
         }
 
         function tiltShovel(direction) {
+            if (direction) {
+                pushDirection = direction;
+                snowShovel.style.setProperty('--tool-direction', direction);
+            }
             snowShovel.style.setProperty('--shovel-tilt', (-12 * direction) + 'deg');
+        }
+
+        function moundIndex() {
+            const step = canvas.clientWidth / pile.length;
+            const center = parseFloat(snowShovel.style.left);
+            const front = center + pushDirection * (tools[toolIndex].width / 2 + 2 * step);
+            return Math.max(0, Math.min(pile.length - 1, Math.round(front / step - 0.5)));
         }
 
         function drawPile() {
@@ -393,8 +517,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const height = canvas.clientHeight;
             const step = width / pile.length;
             const moundWeights = [1, 2, 3, 2, 1];
+            const mound = moundIndex();
             const heights = Array.from(pile, function (value, index) {
-                const weight = moundWeights[index - keyboardIndex + 2] || 0;
+                const weight = moundWeights[index - mound + 2] || 0;
                 const groundHeight = value * (1 - pileProfile[index] / pileHeight);
                 return Math.min(height - 5, groundHeight + shovelLoad * weight / 9);
             });
@@ -445,10 +570,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function snowIndex(clientX) {
-            if (clientX <= 26) {
+            const halfWidth = tools[toolIndex].width / 2;
+            if (clientX <= halfWidth) {
                 return 0;
             }
-            if (clientX >= window.innerWidth - 26) {
+            if (clientX >= window.innerWidth - halfWidth) {
                 return pile.length - 1;
             }
             return Math.max(0, Math.min(pile.length - 1, Math.floor(clientX / window.innerWidth * pile.length)));
@@ -462,7 +588,6 @@ document.addEventListener('DOMContentLoaded', function () {
             snowEffect.after(canvas);
             resizePile();
             positionShovel(Math.floor(pile.length * 0.96));
-            snowShovel.style.left = '96%';
             window.addEventListener('resize', resizePile);
             snowTimer = window.setInterval(function () {
                 let freeSpace = pile.reduce((total, height) => total + pileHeight - height, 0) - shovelLoad;
@@ -477,11 +602,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function renderSnow() {
-            snowToggle.disabled = !seasonActive;
-            snowToggle.textContent = seasonActive
-                ? (snowEnabled ? snowToggle.dataset.snowOn : snowToggle.dataset.snowOff)
-                : snowToggle.dataset.snowSeason;
-            snowToggle.setAttribute('aria-pressed', String(snowEnabled));
+            updateSnowToggle();
             window.clearInterval(snowTimer);
             window.removeEventListener('resize', resizePile);
             if (pointerId !== null && snowShovel.hasPointerCapture(pointerId)) {
@@ -490,8 +611,10 @@ document.addEventListener('DOMContentLoaded', function () {
             pointerId = null;
             lastIndex = null;
             shovelLoad = 0;
+            stopBlowing();
             tiltShovel(0);
             snowShovel.hidden = !seasonActive || !snowEnabled || reducedMotion.matches;
+            snowGame.hidden = snowShovel.hidden || toolIndex === tools.length - 1;
             snowEffect.replaceChildren();
             if (canvas) {
                 canvas.remove();
@@ -527,14 +650,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             seasonActive = currentSeason;
-            snowEnabled = seasonActive && window.localStorage.getItem(snowPreferenceKey) !== 'false';
+            snowEnabled = seasonActive && (!canToggleSnow() || window.localStorage.getItem(snowPreferenceKey) !== 'false');
             renderSnow();
         }
 
         snowToggle.addEventListener('click', function () {
             synchronizeSeason();
 
-            if (!seasonActive) {
+            if (!seasonActive || !canToggleSnow()) {
                 return;
             }
 
@@ -561,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (index !== lastIndex) {
                 tiltShovel(Math.sign(index - lastIndex));
             }
-            shovelLoad = pushSnow(pile, lastIndex, index, shovelCapacity, shovelLoad);
+            moveSnow(lastIndex, index);
             lastIndex = index;
             positionShovel(index);
             drawPile();
@@ -570,6 +693,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.pointerId === pointerId) {
                 pointerId = null;
                 lastIndex = null;
+                stopBlowing();
                 tiltShovel(0);
                 settleSnow();
             }
@@ -587,17 +711,19 @@ document.addEventListener('DOMContentLoaded', function () {
             if (next !== keyboardIndex) {
                 tiltShovel(direction);
             }
-            shovelLoad = pushSnow(pile, keyboardIndex, next, shovelCapacity, shovelLoad);
+            moveSnow(keyboardIndex, next);
             positionShovel(next);
             drawPile();
         });
         snowShovel.addEventListener('keyup', function (event) {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                stopBlowing();
                 tiltShovel(0);
                 settleSnow();
             }
         });
         snowShovel.addEventListener('blur', function () {
+            stopBlowing();
             tiltShovel(0);
             settleSnow();
         });
