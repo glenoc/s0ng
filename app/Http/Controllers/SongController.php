@@ -90,9 +90,7 @@ class SongController extends Controller
             foreach($exploded as $line){
                 $isChord = str_ends_with($line, '_');
 
-                if (Auth::check() || (!Auth::check() && !$isChord)) {
-                    $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
-                }
+                $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
             }
 
             $transposition = Auth::check()

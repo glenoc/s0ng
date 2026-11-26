@@ -82,6 +82,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const playabilityConfig = document.getElementById('song-playability-config');
     const knownChords = playabilityConfig ? JSON.parse(playabilityConfig.dataset.chords) : [];
     const songLyrics = document.getElementById('song-lyrics');
+    const guestChordToggle = document.getElementById('guest-chords-toggle');
+
+    if (guestChordToggle) {
+        const preferenceKey = 's0ng.guest.chords.enabled';
+        function updateGuestChords() {
+            const enabled = window.localStorage.getItem(preferenceKey) === 'true';
+            guestChordToggle.textContent = enabled ? guestChordToggle.dataset.on : guestChordToggle.dataset.off;
+            guestChordToggle.setAttribute('aria-pressed', String(enabled));
+            document.querySelectorAll('.guest-chord-line').forEach(line => {
+                line.hidden = !enabled;
+            });
+            document.dispatchEvent(new Event('guest-chords-change'));
+        }
+        guestChordToggle.addEventListener('click', function () {
+            const enabled = guestChordToggle.getAttribute('aria-pressed') !== 'true';
+            window.localStorage.setItem(preferenceKey, String(enabled));
+            updateGuestChords();
+        });
+        window.addEventListener('storage', function (event) {
+            if (event.key === preferenceKey || event.key === null) {
+                updateGuestChords();
+            }
+        });
+        updateGuestChords();
+        guestChordToggle.hidden = false;
+    }
 
     if (songLyrics) {
         const mobileScreen = window.matchMedia('(max-width: 600px)');
@@ -255,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         fitSongLyrics();
+        document.addEventListener('guest-chords-change', fitSongLyrics);
         window.addEventListener('resize', fitSongLyrics);
         document.fonts.ready.then(fitSongLyrics);
     }

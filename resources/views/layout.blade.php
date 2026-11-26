@@ -70,6 +70,8 @@
                             <a class="btn song-auth-button" href="{{ route('users.edit', auth()->user()) }}">{{ __('ui.my_profile') }}</a>
                             <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
                         @else
+                            <button id="guest-chords-toggle" class="btn song-auth-button" type="button" aria-pressed="false"
+                                data-on="{{ __('ui.guest_chords_on') }}" data-off="{{ __('ui.guest_chords_off') }}" hidden>{{ __('ui.guest_chords_off') }}</button>
                             <a class="btn song-auth-button" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
                         @endauth
                     </div>
