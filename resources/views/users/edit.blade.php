@@ -50,6 +50,30 @@
                 @endif
             </div>
         </form>
+        @if ($isMe)
+            <hr>
+            <form id="known-chords-form" method="POST" action="{{ route('profile.chords.update') }}"
+                data-known-chords="{{ json_encode(is_array(old('known_chords')) ? old('known_chords') : ($user->known_chords ?? [])) }}"
+                data-song-notation="{{ json_encode($songNotation) }}">
+                @csrf
+                @method('PUT')
+                <div class="mb-3">
+                    <fieldset id="known-chords-fieldset" hidden aria-describedby="known-chords-help">
+                        <legend class="fs-6">{{ __('ui.known_chords') }}</legend>
+                        <div id="known-chords-options" class="d-flex flex-wrap gap-2"></div>
+                        <button class="btn btn-primary mt-3" type="submit">{{ __('ui.save_chords') }}</button>
+                    </fieldset>
+                    <div id="known-chords-help" class="form-text">{{ __('ui.known_chords_help') }}</div>
+                    @if ($errors->has('known_chords') || $errors->has('known_chords.*'))
+                        <div id="known-chords-error" class="text-danger" role="alert">{{ $errors->first('known_chords') ?: $errors->first('known_chords.*') }}</div>
+                    @endif
+                    <noscript><p class="text-danger">{{ __('ui.chords_require_javascript') }}</p></noscript>
+                </div>
+                @if (session('chords_saved'))
+                    <p class="text-success" role="status">{{ __('ui.chords_saved') }}</p>
+                @endif
+            </form>
+        @endif
     </div>
 </div>
 

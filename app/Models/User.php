@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -32,6 +33,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'known_chords',
     ];
 
     /**
@@ -41,10 +43,18 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'known_chords' => 'array',
     ];
 
     public function isSuperAdmin(): bool
     {
         return $this->isSuperAdmin == 1;
+    }
+
+    public function transpositionSongs(): BelongsToMany
+    {
+        return $this->belongsToMany(Song::class, 'song_transpositions')
+            ->select('songs.id')
+            ->withPivot('semitones', 'capo');
     }
 }
