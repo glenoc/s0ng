@@ -256,8 +256,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!seasonActive || !snowEnabled || reducedMotion.matches) {
                 return;
             }
-
-            for (let index = 0; index < 36; index += 1) {
+            let snowflakeCount = (window.innerWidth + window.innerHeight) / 50;
+            for (let index = 0; index < snowflakeCount; index += 1) {
                 const flake = document.createElement('span');
                 flake.className = 'snowflake';
                 flake.textContent = '❄';
