@@ -3,7 +3,7 @@ const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', '
 const notes = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const capoPattern = /^([ \t]*capo[ \t]*[:.]?[ \t]*)(\d+)(?:[ \t]*\.[ \t]*)?(?:st|nd|rd|th)?\.?(?:[ \t]*(?:fret|bånd))?/i;
 const chordPattern = /^([A-G])([#b♯♭]?)((?:m|min|maj|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°ø-]|\([^)]*\))*)(?:\/([A-G])([#b♯♭]?))?$/;
-const sectionPattern = /\[(?:intro|outro|verse|vers|chorus|omkvæd|refrain|bridge|bro|interlude|mellemspil|instrumental|solo|pre[- ]chorus)(?:\s+\d+)?\]/gi;
+const sectionPattern = /\[(?:intro|outro|verse|vers|chorus|omkvæd|refrain|bridge|bro|break|interlude|mellemspil|instrumental|solo|pre[- ]chorus)(?:\s+\d+)?\]/gi;
 const repeatPattern = /(^|[\s|,\[\]])\(\s*(?:x\s*\d+|\d+\s*x)\s*\)(?=$|[\s|,\[\]])/gi;
 
 export function findCapo(lines) {
@@ -67,7 +67,7 @@ export function extractChords(lines) {
             const parsed = chordToken(match[0]);
             if (parsed.chord) {
                 chords.set(chordKey(parsed.chord), chords.get(chordKey(parsed.chord)) || parsed.token);
-            } else if (!/^[-.:/]+$/.test(match[0])) {
+            } else if (!/^[-.:/]+$/.test(match[0]) && !/^(?:N\.?C\.?|%)$/i.test(match[0])) {
                 unknown.push(match[0]);
             }
         }
