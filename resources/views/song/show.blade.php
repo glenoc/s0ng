@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('content-container-class', 'container-fluid px-1')
+@section('content-container-class', 'container-lg song-show-container')
 @section('content-row-class', 'gx-0')
 
 @section('style')
@@ -11,6 +11,13 @@
         display: block;
     }
 
+    @media only screen and (max-width: 991.98px) {
+        .song-show-container {
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
+    }
+
     @media only screen and (max-width: 600px) {
         #song-lyrics {
             overflow-x: auto;
@@ -19,6 +26,14 @@
 
     .chord-line {
         font-weight: 1000;
+    }
+
+    .transpose-control {
+        width: 8rem;
+    }
+
+    .transpose-control .btn {
+        width: 2.5rem;
     }
 
     #songdiv {
@@ -40,6 +55,42 @@
                     <button class="btn btn-outline-primary" type="submit">{{ __('ui.start_song') }}</button>
                 </form>
                 <a class="btn btn-outline-secondary" href="{{route('song.edit', $song->id)}}">{{ __('ui.edit') }}</a>
+                <form id="song-transposition" class="mt-2" method="POST" action="{{ route('song.transposition', $song) }}"
+                    data-semitones="{{ $transposition->semitones ?? 0 }}"
+                    data-capo="{{ $transposition->capo ?? '' }}"
+                    data-capo-error="{{ __('ui.capo_out_of_range') }}">
+                    @csrf
+                    @if ($errors->has('semitones') || $errors->has('capo'))
+                        <div class="text-danger" role="alert">
+                            {{ $errors->first('semitones') }} {{ $errors->first('capo') }}
+                        </div>
+                    @endif
+                    <fieldset hidden>
+                        <div class="d-flex flex-wrap align-items-end gap-2">
+                            <div>
+                                <div id="semitones-label" class="form-label mb-0">{{ __('ui.transpose') }}</div>
+                                <div class="input-group transpose-control">
+                                    <button class="btn btn-outline-secondary" type="button" data-adjust="semitones" data-step="-1" aria-label="{{ __('ui.transpose_down') }}">−</button>
+                                    <output id="song-semitones-value" class="form-control text-center" aria-labelledby="semitones-label" aria-live="polite"></output>
+                                    <button class="btn btn-outline-secondary" type="button" data-adjust="semitones" data-step="1" aria-label="{{ __('ui.transpose_up') }}">+</button>
+                                </div>
+                                <input id="song-semitones" type="hidden" name="semitones">
+                            </div>
+                            <div>
+                                <div id="capo-label" class="form-label mb-0">{{ __('ui.capo_fret') }}</div>
+                                <div class="input-group transpose-control">
+                                    <button class="btn btn-outline-secondary" type="button" data-adjust="capo" data-step="-1" aria-label="{{ __('ui.capo_down') }}">−</button>
+                                    <output id="song-capo-value" class="form-control text-center" aria-labelledby="capo-label" aria-live="polite"></output>
+                                    <button class="btn btn-outline-secondary" type="button" data-adjust="capo" data-step="1" aria-label="{{ __('ui.capo_up') }}">+</button>
+                                </div>
+                                <input id="song-capo" type="hidden" name="capo">
+                            </div>
+                            <button class="btn btn-primary" type="submit">{{ __('ui.save_transposition') }}</button>
+                            <button id="song-transposition-reset" class="btn btn-outline-secondary" type="button">{{ __('ui.reset_transposition') }}</button>
+                        </div>
+                        <small>{{ __('ui.transposition_help') }}</small>
+                    </fieldset>
+                </form>
             @endauth
         </div>
         <div class="card-body p-1">

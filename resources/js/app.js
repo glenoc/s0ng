@@ -1,5 +1,6 @@
 import 'bootstrap';
 import { addSnow, createSnowPile, createSnowProfile, depositSnow, pushSnow } from './snow-pile.mjs';
+import { findCapo, formatCapoLine, transposeChordLine } from './transposition.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
     const songLyrics = document.getElementById('song-lyrics');
@@ -24,6 +25,66 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (widestLine > songLyrics.clientWidth) {
                 songLyrics.style.fontSize = (fontSize * songLyrics.clientWidth / (widestLine + 1)) + 'px';
+            }
+        }
+
+        const transposition = document.getElementById('song-transposition');
+        if (transposition) {
+            const originals = Array.from(lines, line => line.textContent);
+            const originalCapo = findCapo(originals);
+            const semitones = document.getElementById('song-semitones');
+            const capo = document.getElementById('song-capo');
+            const addedCapo = document.createElement('span');
+            addedCapo.className = 'text-line song-text';
+            semitones.value = transposition.dataset.semitones;
+            capo.value = transposition.dataset.capo === '' ? String(originalCapo.fret) : transposition.dataset.capo;
+
+            function renderTransposition() {
+                const fret = Number(capo.value);
+                const shift = Number(semitones.value) + originalCapo.fret - fret;
+                document.getElementById('song-semitones-value').textContent = Number(semitones.value) > 0 ? '+' + semitones.value : semitones.value;
+                document.getElementById('song-capo-value').textContent = capo.value;
+                transposition.querySelectorAll('[data-adjust]').forEach(function (button) {
+                    const value = Number(button.dataset.adjust === 'semitones' ? semitones.value : capo.value);
+                    const min = button.dataset.adjust === 'semitones' ? -12 : 0;
+                    const max = button.dataset.adjust === 'semitones' ? 12 : 24;
+                    button.disabled = Number(button.dataset.step) < 0 ? value <= min : value >= max;
+                });
+                lines.forEach(function (line, index) {
+                    if (index === originalCapo.index) {
+                        line.textContent = fret === originalCapo.fret ? originals[index] : formatCapoLine(originals[index], fret);
+                    } else {
+                        line.textContent = line.classList.contains('chord-line')
+                            ? transposeChordLine(originals[index], shift)
+                            : originals[index];
+                    }
+                });
+                addedCapo.textContent = originalCapo.index === -1 && fret !== 0 ? 'Capo: ' + fret : '';
+                addedCapo.hidden = !addedCapo.textContent;
+                fitSongLyrics();
+            }
+
+            transposition.querySelectorAll('[data-adjust]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const input = button.dataset.adjust === 'semitones' ? semitones : capo;
+                    input.value = String(Number(input.value) + Number(button.dataset.step));
+                    renderTransposition();
+                });
+            });
+            document.getElementById('song-transposition-reset').addEventListener('click', function () {
+                semitones.value = '0';
+                capo.value = String(originalCapo.fret);
+                renderTransposition();
+            });
+            if (originalCapo.fret > 24) {
+                const error = document.createElement('p');
+                error.className = 'text-danger';
+                error.textContent = transposition.dataset.capoError;
+                transposition.appendChild(error);
+            } else {
+                songLyrics.prepend(addedCapo);
+                transposition.querySelector('fieldset').hidden = false;
+                renderTransposition();
             }
         }
 
