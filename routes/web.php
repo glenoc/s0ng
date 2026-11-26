@@ -39,6 +39,7 @@ Route::name('home')->get('/', function () {
 // });
 
 Route::resource('song', SongController::class);
+Route::post('song/{song}/transposition', [SongController::class, 'saveTransposition'])->name('song.transposition')->middleware('auth');
 Route::name('song.search')->get('song.search', [SongController::class, 'search']);
 Route::name('song-starts.poll')->get('song-starts', [SongStartController::class, 'poll']);
 Route::name('song-starts.store')->post('song/{song}/start', [SongStartController::class, 'store'])->middleware('auth');

@@ -6,6 +6,7 @@ use App\Models\Artist;
 use Illuminate\Http\Request;
 use App\Models\Song;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SongController extends Controller
 {
@@ -87,7 +88,27 @@ class SongController extends Controller
                 }
             }
 
-            return view('song.show', ['song' => $song, 'lines' => $lines]);
+            $transposition = Auth::check()
+                ? DB::table('song_transpositions')->where('user_id', Auth::id())->where('song_id', $song->id)->first()
+                : null;
+
+            return view('song.show', ['song' => $song, 'lines' => $lines, 'transposition' => $transposition]);
+        }
+
+        public function saveTransposition(Request $request, Song $song)
+        {
+            $validated = $request->validate([
+                'semitones' => 'required|integer|between:-12,12',
+                'capo' => 'required|integer|between:0,24',
+            ]);
+
+            DB::table('song_transpositions')->upsert(
+                [['user_id' => $request->user()->id, 'song_id' => $song->id, 'semitones' => $validated['semitones'], 'capo' => $validated['capo'], 'updated_at' => now(), 'created_at' => now()]],
+                ['user_id', 'song_id'],
+                ['semitones', 'capo', 'updated_at']
+            );
+
+            return redirect()->route('song.show', $song);
         }
 
         /**
