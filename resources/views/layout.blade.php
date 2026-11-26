@@ -45,6 +45,11 @@
                         <li class="nav-item">
                             <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">{{ __('ui.artists') }}</a>
                         </li>
+                        @can('isSuperAdmin')
+                            <li class="nav-item">
+                                <a @class(['nav-link', 'active' => request()->routeIs('admin.song-notation')]) href="{{ route('admin.song-notation') }}">{{ __('ui.notation_review') }}</a>
+                            </li>
+                        @endcan
                     </ul>
                     <form class="song-search" action="{{ route('song.search') }}" role="search">
                         <label class="visually-hidden" for="song-search">{{ __('ui.search_songbook') }}</label>

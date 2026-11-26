@@ -4,6 +4,49 @@ import { assessPlayability, extractChords, findCapo, formatCapoLine, transposeCh
 import { guitarDiagramStart, guitarVoicing } from './guitar-chords.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const notationReview = document.getElementById('notation-review');
+    if (notationReview) {
+        let count = 0;
+        notationReview.querySelectorAll('[data-notation]').forEach(function (item) {
+            const lines = JSON.parse(item.dataset.notation);
+            if (assessPlayability(lines, ['C']).status !== 'unknown') {
+                item.remove();
+                return;
+            }
+
+            count += 1;
+            const { chords } = extractChords(lines);
+            const reasons = item.querySelector('.notation-review-reasons');
+            lines.forEach(function (line) {
+                const { unknown } = extractChords([line]);
+                if (unknown.length) {
+                    const reason = document.createElement('li');
+                    const text = document.createElement('span');
+                    text.textContent = notationReview.dataset.unknown + ': ' + [...new Set(unknown)].join(', ');
+                    const notation = document.createElement('code');
+                    notation.className = 'd-block text-break';
+                    notation.textContent = line;
+                    reason.append(text, notation);
+                    reasons.appendChild(reason);
+                }
+            });
+            if (!chords.length) {
+                const reason = document.createElement('li');
+                reason.textContent = notationReview.dataset.noChords;
+                reasons.appendChild(reason);
+            }
+            if (findCapo(lines).fret > 24) {
+                const reason = document.createElement('li');
+                reason.textContent = notationReview.dataset.capoError;
+                reasons.appendChild(reason);
+            }
+            item.hidden = false;
+        });
+        notationReview.querySelector('[role=status]').textContent = count
+            ? notationReview.dataset.count.replace(':count', String(count))
+            : notationReview.dataset.empty;
+    }
+
     const knownChordsForm = document.getElementById('known-chords-form');
     if (knownChordsForm) {
         const selected = JSON.parse(knownChordsForm.dataset.knownChords);
