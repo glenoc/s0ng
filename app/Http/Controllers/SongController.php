@@ -20,6 +20,13 @@ class SongController extends Controller
         return view('song.index', ['songs' => $songs]);
     }
 
+    public function notationReview()
+    {
+        $songs = Song::with('artist')->orderBy('name')->get();
+
+        return view('song.notation-review', ['songs' => $songs]);
+    }
+
     public function search(Request $request){
         $request->validate(['search' => 'required|string|max:80']);
         $songs = Song::with('artist')->where('name', 'like', '%'.$request->search.'%')->orderBy('name')->get();
@@ -83,9 +90,7 @@ class SongController extends Controller
             foreach($exploded as $line){
                 $isChord = str_ends_with($line, '_');
 
-                if (Auth::check() || (!Auth::check() && !$isChord)) {
-                    $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
-                }
+                $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
             }
 
             $transposition = Auth::check()

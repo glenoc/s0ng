@@ -16,6 +16,7 @@
     "laravel-vite-plugin": "^3.2.1",
     "lodash": "^4.18.1",
     "postcss": "^8.5.31",
+    "qrcode": "^1.5.4",
     "sass": "^1.106.1",
     "vite": "^8.3.8"
   },

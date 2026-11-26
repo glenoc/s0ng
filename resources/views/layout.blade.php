@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>S0ng</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -45,6 +46,11 @@
                         <li class="nav-item">
                             <a @class(['nav-link', 'active' => request()->routeIs('artist.*')]) href="{{ route('artist.index') }}">{{ __('ui.artists') }}</a>
                         </li>
+                        @can('isSuperAdmin')
+                            <li class="nav-item">
+                                <a @class(['nav-link', 'active' => request()->routeIs('admin.song-notation')]) href="{{ route('admin.song-notation') }}">{{ __('ui.notation_review') }}</a>
+                            </li>
+                        @endcan
                     </ul>
                     <form class="song-search" action="{{ route('song.search') }}" role="search">
                         <label class="visually-hidden" for="song-search">{{ __('ui.search_songbook') }}</label>
@@ -58,19 +64,42 @@
                             <option value="dark">{{ __('ui.dark') }}</option>
                             <option value="christmas" disabled>{{ __('ui.christmas_season') }}</option>
                         </select>
-                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false" data-snow-on="{{ __('ui.snow_on') }}" data-snow-off="{{ __('ui.snow_off') }}" data-snow-season="{{ __('ui.snow_season') }}">
+                        <button id="snow-toggle" class="btn btn-snow-toggle" type="button" aria-pressed="false" data-snow-on="{{ __('ui.snow_on') }}" data-snow-off="{{ __('ui.snow_off') }}" data-snow-season="{{ __('ui.snow_season') }}" hidden>
                             {{ __('ui.snow_off') }}
+                        </button>
+                        <button id="share-qr-toggle" class="btn song-auth-button" type="button" data-bs-toggle="modal" data-bs-target="#share-qr-modal" aria-label="{{ __('ui.share_qr') }}" hidden>
+                            <svg class="d-inline-block align-middle" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm10-2h3v3h-3v-3zm5 0h3v5h-3v-5zm-5 5h3v3h-3v-3zm5 2h3v1h-3v-1z"/>
+                            </svg>
+                            {{ __('ui.share') }}
                         </button>
                         @auth
                             <a class="btn song-auth-button" href="{{ route('users.edit', auth()->user()) }}">{{ __('ui.my_profile') }}</a>
                             <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
                         @else
+                            <button id="guest-chords-toggle" class="btn song-auth-button" type="button" aria-pressed="false"
+                                data-on="{{ __('ui.guest_chords_on') }}" data-off="{{ __('ui.guest_chords_off') }}" hidden>{{ __('ui.guest_chords_off') }}</button>
                             <a class="btn song-auth-button" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
                         @endauth
                     </div>
                 </div>
             </div>
         </nav>
+        <div class="modal fade" id="share-qr-modal" tabindex="-1" aria-labelledby="share-qr-title" aria-hidden="true" data-error="{{ __('ui.share_qr_error') }}">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="share-qr-title">{{ __('ui.share_qr') }}</h2>
+                        <button type="button" class="btn btn-outline-secondary btn-sm ms-auto" data-bs-dismiss="modal" aria-label="{{ __('ui.close') }}">&times;</button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>{{ __('ui.share_qr_help') }}</p>
+                        <canvas id="share-qr-canvas" role="img" aria-label="{{ __('ui.share_qr') }}" hidden></canvas>
+                        <p id="share-qr-error" class="text-danger" role="alert" hidden></p>
+                    </div>
+                </div>
+            </div>
+        </div>
         @auth
             <div id="song-playability-config" hidden
                 data-chords="{{ json_encode(auth()->user()->known_chords ?? []) }}"
@@ -81,8 +110,26 @@
                 data-unknown="{{ __('ui.playability_unknown') }}"></div>
         @endauth
         <div id="snow-effect" aria-hidden="true"></div>
-        <button id="snow-shovel" class="snow-shovel" type="button" aria-label="{{ __('ui.snow_shovel') }}" aria-describedby="snow-shovel-help" hidden>
-            <svg viewBox="0 0 52 72" aria-hidden="true">
+        <div id="snow-game" class="snow-game" hidden
+            data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+            data-small="{{ __('ui.snow_tool_small') }}"
+            data-large="{{ __('ui.snow_tool_large') }}"
+            data-scraper="{{ __('ui.snow_tool_scraper') }}"
+            data-plow="{{ __('ui.snow_tool_plow') }}"
+            data-blower="{{ __('ui.snow_tool_blower') }}"
+            data-next="{{ __('ui.snow_game_next') }}"
+            data-unlocked="{{ __('ui.snow_game_unlocked') }}">
+            <details id="snow-game-details" open>
+                <summary>{{ __('ui.snow_game_progress') }}</summary>
+                <strong id="snow-game-tool"></strong>
+                <div id="snow-game-progress"></div>
+                <progress id="snow-game-meter" aria-labelledby="snow-game-progress"></progress>
+            </details>
+        </div>
+        <span id="snow-shovel-help" class="visually-hidden">{{ __('ui.snow_game_help') }}</span>
+        <span id="snow-game-announcement" class="visually-hidden" aria-live="polite"></span>
+        <button id="snow-shovel" class="snow-shovel" type="button" aria-describedby="snow-shovel-help" hidden>
+            <svg data-tool="small" viewBox="0 0 52 72" aria-hidden="true">
                 <defs>
                     <linearGradient id="shovel-handle" x1="0" y1="0" x2="1" y2="0">
                         <stop stop-color="#a96b35"/>
@@ -104,6 +151,82 @@
                 <circle cx="26" cy="50" r="1" fill="#e1e4dc"/>
                 <circle cx="26" cy="54" r=".8" fill="#e1e4dc"/>
                 <path d="M6 68h40" stroke="#ff9b83" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+            </svg>
+            <svg data-tool="large" viewBox="0 0 72 90" aria-hidden="true" hidden>
+                <path d="M33 15h6v45h-6z" fill="#b7793e" stroke="#70421d" stroke-width="2"/>
+                <path d="M24 3h24l-3 10H27z" fill="#2563eb" stroke="#1e3a8a" stroke-width="2"/>
+                <path d="M7 56h58l-3 22q-1 8-9 8H19q-8 0-9-8z" fill="#2563eb" stroke="#1e3a8a" stroke-width="3"/>
+                <path d="M20 61l2 19m14-19v20m16-20-2 19" stroke="#bfdbfe" stroke-width="2"/>
+            </svg>
+            <svg data-tool="scraper" viewBox="0 0 110 86" aria-hidden="true" hidden>
+                <path d="M39 54 28 8h54L71 54M37 9h36" fill="none" stroke="#536779" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 54h100l-6 22q-1 5-7 5H18q-6 0-7-5z" fill="#df2020" stroke="#991b1b" stroke-width="3"/>
+                <path d="M13 75h84" stroke="#fca5a5" stroke-width="3"/>
+            </svg>
+            <svg data-tool="plow" viewBox="0 0 180 110" aria-hidden="true" hidden>
+                <path d="M41 69h78v17H35z" fill="#263b2b"/>
+                <path d="M27 67q3-16 21-16h22v18z" fill="#338b3b" stroke="#174f22" stroke-width="3"/>
+                <path d="M82 51h37q12 0 16 11l2 12H79z" fill="#3ba34a" stroke="#174f22" stroke-width="3"/>
+                <path d="M87 56h28m-29 5h31" stroke="#9ad68d" stroke-width="2"/>
+                <path d="M58 48h18l3 5H56zM56 48V37h7v11" fill="#242b2c" stroke="#162b1c" stroke-width="2"/>
+                <path d="M88 51l-4-13m-8 0h14" fill="none" stroke="#293d31" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="130" cy="65" r="3" fill="#fff3a0"/>
+                <path d="M133 79h18m-2-26 8 2-1 33-11-3z" fill="#667880" stroke="#34444a" stroke-width="3"/>
+                <path d="M151 51q9 5 25 5l-3 27q-11 0-25-3z" fill="#f4b51b" stroke="#936500" stroke-width="3"/>
+                <path d="M152 76q12 5 21 4" fill="none" stroke="#ffe081" stroke-width="2"/>
+                <circle cx="48" cy="83" r="21" fill="#242c2e" stroke="#101617" stroke-width="3"/>
+                <circle cx="48" cy="83" r="12" fill="#e1ba2c" stroke="#96751a" stroke-width="3"/>
+                <circle cx="48" cy="83" r="4" fill="#6f812b"/>
+                <circle cx="113" cy="88" r="15" fill="#242c2e" stroke="#101617" stroke-width="3"/>
+                <circle cx="113" cy="88" r="8" fill="#e1ba2c" stroke="#96751a" stroke-width="2"/>
+            </svg>
+            <svg data-tool="blower" viewBox="0 0 200 110" aria-hidden="true" hidden>
+                <path d="M35 69h96v16H29z" fill="#243540"/>
+                <path d="M39 61V21l9-9h44l8 49z" fill="#2a6390" stroke="#173d5c" stroke-width="3"/>
+                <path d="M46 26l5-7h14v30H46zM70 19h17l6 30H70z" fill="#bce3f2" stroke="#20455f" stroke-width="2"/>
+                <path d="M69 14v46M45 55h51" fill="none" stroke="#173d5c" stroke-width="3"/>
+                <path d="M96 53h29q11 0 14 12l2 12H96z" fill="#3889be" stroke="#173d5c" stroke-width="3"/>
+                <path d="M105 59h23m-23 5h25m-24 5h23" stroke="#174461" stroke-width="2"/>
+                <path d="M26 56h13m1-35h-9v14" fill="none" stroke="#263b46" stroke-width="4"/>
+                <circle cx="134" cy="60" r="3" fill="#fff3a0"/>
+                <circle cx="48" cy="80" r="26" fill="#242c2e" stroke="#101617" stroke-width="3"/>
+                <circle cx="48" cy="80" r="14" fill="#c6d0d5" stroke="#6b7981" stroke-width="3"/>
+                <circle cx="48" cy="80" r="5" fill="#75858b"/>
+                <circle cx="114" cy="86" r="17" fill="#242c2e" stroke="#101617" stroke-width="3"/>
+                <circle cx="114" cy="86" r="9" fill="#c6d0d5" stroke="#6b7981" stroke-width="2"/>
+                <path d="M134 79h12" stroke="#4b5c63" stroke-width="5"/>
+                <path d="M146 64h45l-3 33h-44z" fill="#f19d12" stroke="#935a08" stroke-width="3"/>
+                <g class="snow-auger" fill="none" stroke="#fff0b0" stroke-width="3">
+                    <circle cx="168" cy="80" r="11"/>
+                    <path d="M168 69v22m-11-11h22"/>
+                </g>
+                <path d="M159 64V47q0-7 7-7h4l10-10 7 7-10 10h-9v17z" fill="#f19d12" stroke="#935a08" stroke-width="3" stroke-linejoin="round"/>
+                <g class="snow-spray" fill="#f5fbff" stroke="#a9d7ec" stroke-width="1">
+                    <g class="snow-spray-light">
+                        <circle cx="183" cy="33" r="4"/>
+                        <circle cx="184" cy="34" r="3"/>
+                        <circle cx="182" cy="32" r="3.5"/>
+                        <circle cx="183" cy="34" r="2.5"/>
+                        <circle cx="182" cy="33" r="3"/>
+                        <circle cx="184" cy="32" r="2.5"/>
+                    </g>
+                    <g class="snow-spray-medium">
+                        <circle cx="183" cy="33" r="4.5"/>
+                        <circle cx="184" cy="34" r="3.5"/>
+                        <circle cx="182" cy="32" r="4"/>
+                        <circle cx="183" cy="34" r="3"/>
+                        <circle cx="182" cy="33" r="3.5"/>
+                        <circle cx="184" cy="32" r="3"/>
+                    </g>
+                    <g class="snow-spray-heavy">
+                        <circle cx="183" cy="33" r="5"/>
+                        <circle cx="184" cy="34" r="4"/>
+                        <circle cx="182" cy="32" r="4.5"/>
+                        <circle cx="183" cy="34" r="3.5"/>
+                        <circle cx="182" cy="33" r="4"/>
+                        <circle cx="184" cy="32" r="3.5"/>
+                    </g>
+                </g>
             </svg>
         </button>
         <div

@@ -22,26 +22,32 @@ export function addSnow(pile, index, amount, maxHeight) {
     pile[index] = Math.min(maxHeight, pile[index] + amount);
 }
 
-export function pushSnow(pile, from, to, capacity, load = 0) {
+export function pushSnow(pile, from, to, capacity, load = 0, blow = false) {
     const direction = Math.sign(to - from);
 
     if (!direction) {
-        return load;
+        return { load, cleared: 0 };
     }
 
+    let cleared = 0;
     for (let index = from; index !== to; index += direction) {
-        const moved = Math.min(pile[index], capacity - load);
+        const moved = Math.min(pile[index], blow ? capacity : capacity - load);
         pile[index] -= moved;
-        load += moved;
+        if (blow) {
+            cleared += moved;
+        } else {
+            load += moved;
+        }
     }
 
     if ((direction === 1 && to === pile.length - 1) || (direction === -1 && to === 0)) {
-        const moved = Math.min(pile[to], capacity - load);
+        const moved = Math.min(pile[to], blow ? capacity : capacity - load);
         pile[to] -= moved;
-        return 0;
+        cleared += load + moved;
+        load = 0;
     }
 
-    return load;
+    return { load, cleared };
 }
 
 export function depositSnow(pile, index, load, maxHeight) {

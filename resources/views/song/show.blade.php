@@ -28,6 +28,10 @@
         font-weight: 1000;
     }
 
+    .guest-chord-line[hidden] {
+        display: none;
+    }
+
     .transpose-control {
         width: 8rem;
     }
@@ -110,7 +114,7 @@
         <div class="card-body p-1">
             <div id="song-lyrics">
                 @foreach ($lines as $line)
-                    <span class="{{$line->isChord?'chord-line':'text-line'}} song-text">{{$line->text}}</span>
+                    <span @class(['song-text', 'chord-line' => $line->isChord, 'text-line' => !$line->isChord, 'guest-chord-line' => $line->isChord && auth()->guest()]) @if ($line->isChord && auth()->guest()) hidden @endif>{{$line->text}}</span>
                 @endforeach
             </div>
         </div>
