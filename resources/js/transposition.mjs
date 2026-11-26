@@ -3,6 +3,8 @@ const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', '
 const notes = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const capoPattern = /^([ \t]*capo[ \t]*[:.]?[ \t]*)(\d+)(?:[ \t]*\.[ \t]*)?(?:st|nd|rd|th)?\.?(?:[ \t]*(?:fret|bånd))?/i;
 const chordPattern = /^([A-G])([#b♯♭]?)((?:m|min|maj|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°ø-]|\([^)]*\))*)(?:\/([A-G])([#b♯♭]?))?$/;
+const sectionPattern = /\[(?:intro|outro|verse|vers|chorus|omkvæd|refrain|bridge|bro|interlude|mellemspil|instrumental|solo|pre[- ]chorus)(?:\s+\d+)?\]/gi;
+const repeatPattern = /(^|[\s|,\[\]])\(\s*(?:x\s*\d+|\d+\s*x)\s*\)(?=$|[\s|,\[\]])/gi;
 
 export function findCapo(lines) {
     for (let index = 0; index < lines.length; index += 1) {
@@ -60,7 +62,8 @@ export function extractChords(lines) {
         if (capoPattern.test(line)) {
             return;
         }
-        for (const match of line.matchAll(/[^\s|,\[\]]+/g)) {
+        const notation = line.replace(sectionPattern, ' ').replace(repeatPattern, ' ');
+        for (const match of notation.matchAll(/[^\s|,\[\]]+/g)) {
             const parsed = chordToken(match[0]);
             if (parsed.chord) {
                 chords.set(chordKey(parsed.chord), chords.get(chordKey(parsed.chord)) || parsed.token);
