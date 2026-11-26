@@ -10,9 +10,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const songNotation = JSON.parse(knownChordsForm.dataset.songNotation);
         const roots = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const common = roots.flatMap(root => [root, root + 'm']);
+        const basic = new Set(['A', 'Am', 'B', 'Bm', 'C', 'Cm', 'D', 'Dm', 'E', 'Em', 'F', 'Fm', 'G', 'Gm']);
         const choices = extractChords([selected.join(' '), common.join(' '), ...songNotation.flat()]).chords;
         const options = document.getElementById('known-chords-options');
-        choices.sort((a, b) => a.localeCompare(b, 'da')).forEach(function (chord, index) {
+        const moreOptions = document.getElementById('more-chords-options');
+        const selectedCount = document.getElementById('more-chords-selected');
+        function updateSelectedCount() {
+            const count = moreOptions.querySelectorAll('input:checked').length;
+            selectedCount.textContent = count ? '(' + count + ')' : '';
+        }
+        choices.sort((a, b) => a.localeCompare(b, 'da')).forEach(function (chord) {
             const label = document.createElement('label');
             label.className = 'btn btn-outline-secondary';
             const checkbox = document.createElement('input');
@@ -22,11 +29,15 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.checked = selected.includes(chord);
             checkbox.className = 'form-check-input me-1';
             label.append(checkbox, document.createTextNode(chord));
-            options.appendChild(label);
+            (basic.has(chord) ? options : moreOptions).appendChild(label);
         });
+        moreOptions.addEventListener('change', updateSelectedCount);
+        updateSelectedCount();
         document.getElementById('known-chords-fieldset').hidden = false;
     }
 
+    const playabilityConfig = document.getElementById('song-playability-config');
+    const knownChords = playabilityConfig ? JSON.parse(playabilityConfig.dataset.chords) : [];
     const songLyrics = document.getElementById('song-lyrics');
 
     if (songLyrics) {
@@ -205,8 +216,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.fonts.ready.then(fitSongLyrics);
     }
 
-    const playabilityConfig = document.getElementById('song-playability-config');
-    const knownChords = playabilityConfig ? JSON.parse(playabilityConfig.dataset.chords) : [];
     if (knownChords.length > 0) {
         document.querySelectorAll('.song-playability').forEach(function (badge) {
             const result = assessPlayability(JSON.parse(badge.dataset.notation), knownChords, {
