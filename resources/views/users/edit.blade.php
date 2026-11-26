@@ -61,6 +61,10 @@
                     <fieldset id="known-chords-fieldset" hidden aria-describedby="known-chords-help">
                         <legend class="fs-6">{{ __('ui.known_chords') }}</legend>
                         <div id="known-chords-options" class="d-flex flex-wrap gap-2"></div>
+                        <details id="more-chords" class="mt-3">
+                            <summary>{{ __('ui.more_chords') }} <span id="more-chords-selected"></span></summary>
+                            <div id="more-chords-options" class="d-flex flex-wrap gap-2 mt-2"></div>
+                        </details>
                         <button class="btn btn-primary mt-3" type="submit">{{ __('ui.save_chords') }}</button>
                     </fieldset>
                     <div id="known-chords-help" class="form-text">{{ __('ui.known_chords_help') }}</div>
