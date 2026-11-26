@@ -47,6 +47,7 @@ Route::name('song-starts.store')->post('song/{song}/start', [SongStartController
 Route::resource('artist', ArtistController::class);
 
 Route::resource('users', UserController::class);
+Route::put('profile/chords', [UserController::class, 'updateChords'])->name('profile.chords.update')->middleware('auth');
 
 Route::get('superAdmin', [UserController::class, 'superAdminSetup']);
 

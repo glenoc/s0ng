@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -67,7 +69,10 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $isMe = (Auth::user()->id == $user->id);
-        return view('users.edit', ['user' => $user, 'isMe' => $isMe]);
+        $songNotation = $isMe
+            ? Song::select('text')->get()->map(fn ($song) => $song->chordNotation())->all()
+            : [];
+        return view('users.edit', ['user' => $user, 'isMe' => $isMe, 'songNotation' => $songNotation]);
     }
 
     public function update(Request $request, User $user)
@@ -87,6 +92,26 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->route('home');
+    }
+
+    public function updateChords(Request $request)
+    {
+        $validated = $request->validate([
+            'known_chords' => 'nullable|array|max:200',
+            'known_chords.*' => 'required|string|max:80',
+        ]);
+        $chords = $validated['known_chords'] ?? [];
+        $pattern = '/^[A-G][#b♯♭]?(?:(?:m|min|maj|M|dim|aug|sus|add|no|omit|alt|[0-9+#b♯♭°ø-]|\([^)]*\))*)(?:\/[A-G][#b♯♭]?)?$/u';
+        foreach ($chords as $chord) {
+            if (!preg_match($pattern, $chord)) {
+                throw ValidationException::withMessages(['known_chords' => __('ui.invalid_chord', ['chord' => $chord])]);
+            }
+        }
+
+        $request->user()->known_chords = array_values(array_unique($chords));
+        $request->user()->save();
+
+        return redirect()->route('users.edit', $request->user())->with('chords_saved', true);
     }
 
     public function destroy(User $user)

@@ -1,8 +1,32 @@
 import 'bootstrap';
 import { addSnow, createSnowPile, createSnowProfile, depositSnow, pushSnow } from './snow-pile.mjs';
-import { findCapo, formatCapoLine, transposeChordLine } from './transposition.mjs';
+import { assessPlayability, extractChords, findCapo, formatCapoLine, transposeChordLine } from './transposition.mjs';
+import { guitarDiagramStart, guitarVoicing } from './guitar-chords.mjs';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const knownChordsForm = document.getElementById('known-chords-form');
+    if (knownChordsForm) {
+        const selected = JSON.parse(knownChordsForm.dataset.knownChords);
+        const songNotation = JSON.parse(knownChordsForm.dataset.songNotation);
+        const roots = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const common = roots.flatMap(root => [root, root + 'm']);
+        const choices = extractChords([selected.join(' '), common.join(' '), ...songNotation.flat()]).chords;
+        const options = document.getElementById('known-chords-options');
+        choices.sort((a, b) => a.localeCompare(b, 'da')).forEach(function (chord, index) {
+            const label = document.createElement('label');
+            label.className = 'btn btn-outline-secondary';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'known_chords[]';
+            checkbox.value = chord;
+            checkbox.checked = selected.includes(chord);
+            checkbox.className = 'form-check-input me-1';
+            label.append(checkbox, document.createTextNode(chord));
+            options.appendChild(label);
+        });
+        document.getElementById('known-chords-fieldset').hidden = false;
+    }
+
     const songLyrics = document.getElementById('song-lyrics');
 
     if (songLyrics) {
@@ -35,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const semitones = document.getElementById('song-semitones');
             const capo = document.getElementById('song-capo');
             const addedCapo = document.createElement('span');
+            let selectedChord = null;
             addedCapo.className = 'text-line song-text';
             semitones.value = transposition.dataset.semitones;
             capo.value = transposition.dataset.capo === '' ? String(originalCapo.fret) : transposition.dataset.capo;
@@ -61,7 +86,93 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 addedCapo.textContent = originalCapo.index === -1 && fret !== 0 ? 'Capo: ' + fret : '';
                 addedCapo.hidden = !addedCapo.textContent;
+                const summary = document.getElementById('song-transposition-summary');
+                const signed = value => value > 0 ? '+' + value : String(value);
+                summary.textContent = summary.dataset.summary.replace(':chords', signed(shift)).replace(':total', signed(Number(semitones.value)));
+                renderChordOverview();
                 fitSongLyrics();
+            }
+
+            function renderChordOverview() {
+                const overview = document.getElementById('song-chord-overview');
+                const chordLines = Array.from(lines).filter(line => line.classList.contains('chord-line')).map(line => line.textContent);
+                const result = extractChords(chordLines);
+                const list = overview.querySelector('span');
+                list.replaceChildren();
+                if (!result.chords.length) {
+                    list.append(document.createTextNode(overview.dataset.empty));
+                }
+                if (!result.chords.includes(selectedChord)) {
+                    selectedChord = null;
+                }
+                result.chords.forEach(function (chord) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn btn-sm btn-outline-secondary me-1 mb-1';
+                    button.textContent = chord;
+                    button.setAttribute('aria-controls', 'song-chord-diagram');
+                    button.setAttribute('aria-expanded', String(chord === selectedChord));
+                    button.addEventListener('click', function () {
+                        selectedChord = selectedChord === chord ? null : chord;
+                        list.querySelectorAll('button').forEach(item => item.setAttribute('aria-expanded', String(item.textContent === selectedChord)));
+                        renderChordDiagram();
+                    });
+                    list.appendChild(button);
+                });
+                if (result.unknown.length) {
+                    list.append(document.createTextNode(' ' + overview.dataset.unknown));
+                }
+                renderChordDiagram();
+            }
+
+            function renderChordDiagram() {
+                const diagram = document.getElementById('song-chord-diagram');
+                diagram.replaceChildren();
+                diagram.hidden = selectedChord === null;
+                if (selectedChord === null) {
+                    return;
+                }
+                const title = document.createElement('strong');
+                title.textContent = diagram.dataset.title.replace(':chord', selectedChord);
+                diagram.appendChild(title);
+                const frets = guitarVoicing(selectedChord);
+                if (!frets) {
+                    const message = document.createElement('p');
+                    message.textContent = diagram.dataset.unavailable;
+                    diagram.appendChild(message);
+                    return;
+                }
+
+                const base = guitarDiagramStart(frets);
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 150 140');
+                svg.setAttribute('width', '150');
+                svg.setAttribute('height', '140');
+                svg.setAttribute('role', 'img');
+                svg.setAttribute('aria-label', diagram.dataset.description.replace(':chord', selectedChord).replace(':frets', frets.map(fret => fret < 0 ? 'X' : fret === 0 ? diagram.dataset.open : fret).join(', ')));
+                svg.style.color = 'inherit';
+                function element(name, attributes) {
+                    const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+                    Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value));
+                    svg.appendChild(node);
+                    return node;
+                }
+                for (let string = 0; string < 6; string += 1) {
+                    const x = 25 + string * 20;
+                    element('line', { x1: x, y1: 30, x2: x, y2: 126, stroke: 'currentColor' });
+                    if (frets[string] < 0) {
+                        element('text', { x, y: 22, 'text-anchor': 'middle', fill: 'currentColor' }).textContent = 'X';
+                    } else if (frets[string] > 0) {
+                        element('circle', { cx: x, cy: 42 + (frets[string] - base) * 24, r: 6, fill: 'currentColor' });
+                    }
+                }
+                for (let fret = 0; fret <= 4; fret += 1) {
+                    element('line', { x1: 25, y1: 30 + fret * 24, x2: 125, y2: 30 + fret * 24, stroke: 'currentColor', 'stroke-width': fret === 0 && base === 1 ? 3 : 1 });
+                }
+                diagram.appendChild(svg);
+                const help = document.createElement('div');
+                help.textContent = diagram.dataset.fret.replace(':fret', String(base)) + '. ' + diagram.dataset.help;
+                diagram.appendChild(help);
             }
 
             transposition.querySelectorAll('[data-adjust]').forEach(function (button) {
@@ -81,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 error.className = 'text-danger';
                 error.textContent = transposition.dataset.capoError;
                 transposition.appendChild(error);
+                renderChordOverview();
             } else {
                 songLyrics.prepend(addedCapo);
                 transposition.querySelector('fieldset').hidden = false;
@@ -91,6 +203,28 @@ document.addEventListener('DOMContentLoaded', function () {
         fitSongLyrics();
         window.addEventListener('resize', fitSongLyrics);
         document.fonts.ready.then(fitSongLyrics);
+    }
+
+    const playabilityConfig = document.getElementById('song-playability-config');
+    const knownChords = playabilityConfig ? JSON.parse(playabilityConfig.dataset.chords) : [];
+    if (knownChords.length > 0) {
+        document.querySelectorAll('.song-playability').forEach(function (badge) {
+            const result = assessPlayability(JSON.parse(badge.dataset.notation), knownChords, {
+                semitones: Number(badge.dataset.semitones),
+                capo: badge.dataset.capo === '' ? undefined : Number(badge.dataset.capo)
+            });
+            const labels = {
+                'no-chords': ['noChords', 'text-bg-secondary'],
+                playable: ['playable', 'text-bg-success'],
+                capo: ['withCapo', 'text-bg-info'],
+                unplayable: ['unplayable', 'text-bg-warning'],
+                unknown: ['unknown', 'text-bg-secondary']
+            };
+            const [label, colour] = labels[result.status];
+            badge.textContent = playabilityConfig.dataset[label].replace(':fret', String(result.fret));
+            badge.classList.add(colour);
+            badge.hidden = false;
+        });
     }
 
     function isSnowSeason() {

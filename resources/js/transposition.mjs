@@ -20,20 +20,100 @@ function transposeNote(note, accidental, semitones) {
     return (accidental === 'b' || accidental === '♭' ? flatNotes : sharpNotes)[pitch];
 }
 
+function chordToken(token) {
+    let prefix = '';
+    let suffix = '';
+    while (token.startsWith('(') && token.endsWith(')')) {
+        prefix += '(';
+        suffix += ')';
+        token = token.slice(1, -1);
+    }
+    return { prefix, suffix, token, chord: token.match(chordPattern) };
+}
+
+function pitch(note, accidental) {
+    const alteration = accidental === '#' || accidental === '♯' ? 1 : accidental === 'b' || accidental === '♭' ? -1 : 0;
+    return (notes[note] + alteration + 12) % 12;
+}
+
+export function parseChord(token) {
+    const chord = token.match(chordPattern);
+    if (!chord) {
+        return null;
+    }
+    return {
+        root: pitch(chord[1], chord[2]),
+        quality: chord[3],
+        bass: chord[4] ? pitch(chord[4], chord[5]) : pitch(chord[1], chord[2])
+    };
+}
+
+function chordKey(chord) {
+    return pitch(chord[1], chord[2]) + ':' + chord[3].replace(/^min/, 'm')
+        + (chord[4] ? '/' + pitch(chord[4], chord[5]) : '');
+}
+
+export function extractChords(lines) {
+    const chords = new Map();
+    const unknown = [];
+    lines.forEach(function (line) {
+        if (capoPattern.test(line)) {
+            return;
+        }
+        for (const match of line.matchAll(/[^\s|,\[\]]+/g)) {
+            const parsed = chordToken(match[0]);
+            if (parsed.chord) {
+                chords.set(chordKey(parsed.chord), chords.get(chordKey(parsed.chord)) || parsed.token);
+            } else if (!/^[-.:/]+$/.test(match[0])) {
+                unknown.push(match[0]);
+            }
+        }
+    });
+    return { chords: Array.from(chords.values()), unknown };
+}
+
+export function assessPlayability(lines, knownChords, settings = {}, maxCapo = 5) {
+    const originalCapo = findCapo(lines).fret;
+    const semitones = settings.semitones ?? 0;
+    const currentCapo = settings.capo ?? originalCapo;
+    const { chords, unknown } = extractChords(lines);
+    if (unknown.length || !chords.length || originalCapo > 24) {
+        return { status: 'unknown' };
+    }
+    if (!knownChords.length) {
+        return { status: 'no-chords' };
+    }
+    const known = new Set(knownChords.map(chord => chord.match(chordPattern)).filter(Boolean).map(chordKey));
+    const playable = shift => chords.every(chord => known.has(chordKey(transposeChordLine(chord, shift).match(chordPattern))));
+    if (playable(semitones + originalCapo - currentCapo)) {
+        return { status: 'playable' };
+    }
+    const candidates = Array.from({ length: maxCapo + 1 }, (_, fret) => fret)
+        .filter(fret => fret !== currentCapo)
+        .sort((a, b) => Math.abs(a - currentCapo) - Math.abs(b - currentCapo) || a - b);
+    for (const fret of candidates) {
+        if (playable(semitones + originalCapo - fret)) {
+            return { status: 'capo', fret };
+        }
+    }
+    return { status: 'unplayable' };
+}
+
 export function transposeChordLine(line, semitones) {
     if (semitones % 12 === 0) {
         return line;
     }
 
-    return line.replace(/([^\s|()[\],]+)([ \t]*)/g, function (match, token, spaces, offset) {
-        const chord = token.match(chordPattern);
+    return line.replace(/([^\s|,\[\]]+)([ \t]*)/g, function (match, token, spaces, offset) {
+        const parsed = chordToken(token);
+        const chord = parsed.chord;
         if (!chord) {
             return match;
         }
 
-        const transposed = transposeNote(chord[1], chord[2], semitones) + (chord[3] || '')
-            + (chord[4] ? '/' + transposeNote(chord[4], chord[5], semitones) : '');
-        if (!spaces || offset + match.length === line.length || !/^ +$/.test(spaces)) {
+        const transposed = parsed.prefix + transposeNote(chord[1], chord[2], semitones) + (chord[3] || '')
+            + (chord[4] ? '/' + transposeNote(chord[4], chord[5], semitones) : '') + parsed.suffix;
+        if (parsed.suffix || !spaces || offset + match.length === line.length || !/^ +$/.test(spaces)) {
             return transposed + spaces;
         }
         return transposed + ' '.repeat(Math.max(1, spaces.length + token.length - transposed.length));

@@ -89,8 +89,22 @@
                             <button id="song-transposition-reset" class="btn btn-outline-secondary" type="button">{{ __('ui.reset_transposition') }}</button>
                         </div>
                         <small>{{ __('ui.transposition_help') }}</small>
+                        <div id="song-transposition-summary" aria-live="polite"
+                            data-summary="{{ __('ui.transposition_summary') }}"></div>
                     </fieldset>
                 </form>
+                <div id="song-chord-overview" class="mt-2" aria-live="polite"
+                    data-empty="{{ __('ui.no_song_chords') }}"
+                    data-unknown="{{ __('ui.some_chords_unknown') }}">
+                    <strong>{{ __('ui.song_chords') }}:</strong> <span></span>
+                </div>
+                <div id="song-chord-diagram" class="mt-2" hidden aria-live="polite"
+                    data-title="{{ __('ui.chord_diagram_title') }}"
+                    data-description="{{ __('ui.chord_diagram_description') }}"
+                    data-open="{{ __('ui.chord_diagram_open') }}"
+                    data-unavailable="{{ __('ui.chord_diagram_unavailable') }}"
+                    data-fret="{{ __('ui.chord_diagram_fret') }}"
+                    data-help="{{ __('ui.chord_diagram_help') }}"></div>
             @endauth
         </div>
         <div class="card-body p-1">

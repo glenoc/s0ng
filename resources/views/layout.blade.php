@@ -62,6 +62,7 @@
                             {{ __('ui.snow_off') }}
                         </button>
                         @auth
+                            <a class="btn song-auth-button" href="{{ route('users.edit', auth()->user()) }}">{{ __('ui.my_profile') }}</a>
                             <a class="btn song-auth-button" href="{{ route('logout') }}">{{ __('ui.log_out') }}</a>
                         @else
                             <a class="btn song-auth-button" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
@@ -70,6 +71,15 @@
                 </div>
             </div>
         </nav>
+        @auth
+            <div id="song-playability-config" hidden
+                data-chords="{{ json_encode(auth()->user()->known_chords ?? []) }}"
+                data-no-chords="{{ __('ui.enter_chords') }}"
+                data-playable="{{ __('ui.playable') }}"
+                data-with-capo="{{ __('ui.playable_with_capo') }}"
+                data-unplayable="{{ __('ui.unplayable') }}"
+                data-unknown="{{ __('ui.playability_unknown') }}"></div>
+        @endauth
         <div id="snow-effect" aria-hidden="true"></div>
         <button id="snow-shovel" class="snow-shovel" type="button" aria-label="{{ __('ui.snow_shovel') }}" aria-describedby="snow-shovel-help" hidden>
             <svg viewBox="0 0 52 72" aria-hidden="true">

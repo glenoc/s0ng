@@ -16,9 +16,13 @@ ul {
     </div>
     <div class="card-body">
         <ul>
+        @auth
+            @php($songTranspositions = auth()->user()->transpositionSongs->keyBy('id'))
+        @endauth
         @foreach ($songs as $song)
         <li class="d-flex justify-content-between align-items-center mb-2">
             <a href="{{route('song.show', $song->id)}}">{{$song->name}} - {{$song->artist->name??''}}</a>
+            @include('song.playability')
         </li>
         @endforeach
         </ul>
