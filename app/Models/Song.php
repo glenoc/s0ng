@@ -3,11 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Song extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'hidden_from_guests' => 'boolean',
+    ];
+
+    public function scopeVisibleToGuests(Builder $query): void
+    {
+        $query->where('hidden_from_guests', false);
+    }
 
     public function artist(){
         return $this->belongsTo(Artist::class);

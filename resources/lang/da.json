@@ -70,6 +70,8 @@
     "ui.chord_diagram_help": "Båndene tælles fra capo. X betyder dæmpet streng; en umarkeret streng spilles åben.",
     "ui.guest_chords_on": "Akkorder: til",
     "ui.guest_chords_off": "Akkorder: fra",
+    "ui.hide_song_from_guests": "Skjul sangen for besøgende, der ikke er logget ind",
+    "ui.song_hidden_from_guests": "Skjult for gæster",
     "ui.enter_chords": "Angiv dine akkorder",
     "ui.invalid_chord": "Akkorden :chord kan ikke genkendes. Kontrollér skrivemåden.",
     "ui.known_chords": "Akkorder jeg kan spille",

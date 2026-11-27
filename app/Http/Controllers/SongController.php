@@ -12,11 +12,11 @@ class SongController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only(['create', 'store', 'edit', 'destroy']);
+        $this->middleware('auth')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
     //
     public function index(){
-        $songs = Song::with('artist')->orderBy('name')->get();
+        $songs = Song::with('artist')->when(Auth::guest(), fn ($query) => $query->visibleToGuests())->orderBy('name')->get();
         return view('song.index', ['songs' => $songs]);
     }
 
@@ -34,7 +34,8 @@ class SongController extends Controller
 
     public function search(Request $request){
         $request->validate(['search' => 'required|string|max:80']);
-        $songs = Song::with('artist')->where('name', 'like', '%'.$request->search.'%')->orderBy('name')->get();
+        $songs = Song::with('artist')->when(Auth::guest(), fn ($query) => $query->visibleToGuests())
+            ->where('name', 'like', '%'.$request->search.'%')->orderBy('name')->get();
         return view('song.search', ['songs' => $songs, 'search' => $request->search]);
     }
 
@@ -60,6 +61,7 @@ class SongController extends Controller
                 'name' => 'required|unique:songs,name|max:255',
                 'artist' => 'required|max:255',
                 'text' => 'required',
+                'hidden_from_guests' => 'sometimes|boolean',
             ]);
 
             $artist = Artist::where('name', $request->artist)->first();
@@ -72,6 +74,7 @@ class SongController extends Controller
             $song = new Song();
             $song->name = $request->name;
             $song->text = $request->text;
+            $song->hidden_from_guests = $validated['hidden_from_guests'] ?? false;
             $song->artist()->associate($artist);
             $song->save();
 
@@ -86,6 +89,7 @@ class SongController extends Controller
             */
         public function show(Song $song)
         {
+            abort_if(Auth::guest() && $song->hidden_from_guests, 404);
             $song->load('artist');
 
             $lines = [];
@@ -165,6 +169,7 @@ class SongController extends Controller
                 'name' => 'required|unique:songs,name,'.$song->id.'|max:255',
                 'artist' => 'required|max:255',
                 'text' => 'required',
+                'hidden_from_guests' => 'sometimes|boolean',
             ]);
 
             $artist = Artist::where('name', $request->artist)->first();
@@ -176,6 +181,7 @@ class SongController extends Controller
 
             $song->name = $request->name;
             $song->text = $request->text;
+            $song->hidden_from_guests = $validated['hidden_from_guests'] ?? $song->hidden_from_guests;
             $song->artist()->associate($artist);
             $song->save();
 

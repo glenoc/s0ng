@@ -62,6 +62,9 @@
             <h1 class="mb-1">{{$song->name}}</h1>
             <h3 class="mb-1">{{$song->artist->name}}</h3>
             @auth
+                @if ($song->hidden_from_guests)
+                    <span class="badge text-bg-secondary">{{ __('ui.song_hidden_from_guests') }}</span>
+                @endif
                 <form class="d-inline" method="POST" action="{{ route('song-starts.store', $song) }}">
                     @csrf
                     <button class="btn btn-outline-primary" type="submit">{{ __('ui.start_song') }}</button>
