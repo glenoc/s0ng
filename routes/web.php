@@ -43,6 +43,8 @@ Route::get('admin/song-notation', [SongController::class, 'notationReview'])
     ->middleware(['auth', 'can:isSuperAdmin'])->name('admin.song-notation');
 Route::get('admin/song-notation/data', [SongController::class, 'notationReviewData'])
     ->middleware(['auth', 'can:isSuperAdmin'])->name('admin.song-notation.data');
+Route::get('admin/songs/print', [SongController::class, 'printAll'])
+    ->middleware(['auth', 'can:isSuperAdmin'])->name('admin.songs.print');
 Route::post('song/{song}/transposition', [SongController::class, 'saveTransposition'])->name('song.transposition')->middleware('auth');
 Route::post('song/{song}/autoscroll', [SongController::class, 'saveAutoscroll'])->name('song.autoscroll')->middleware('auth');
 Route::name('song.search')->get('song.search', [SongController::class, 'search']);

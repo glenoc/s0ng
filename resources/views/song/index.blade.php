@@ -12,7 +12,10 @@ ul {
 <div class="card mt-2">
     <div class="card-header d-flex justify-content-between">
         <span class="h2 card-title">{{ __('ui.songs') }}</span>
-        @auth <a class="btn btn-outline-success" href="{{Route('song.create')}}">{{ __('ui.create_song') }}</a> @endauth
+        <div class="d-flex flex-wrap gap-2">
+            @can('isSuperAdmin') <a class="btn btn-outline-secondary" href="{{ route('admin.songs.print') }}">{{ __('ui.print_all_songs') }}</a> @endcan
+            @auth <a class="btn btn-outline-success" href="{{Route('song.create')}}">{{ __('ui.create_song') }}</a> @endauth
+        </div>
     </div>
     <div class="card-body">
         <ul>
