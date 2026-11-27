@@ -32,6 +32,11 @@ class SongController extends Controller
         return response()->json(Song::select('text')->get()->map(fn ($song) => $song->chordNotation()));
     }
 
+    public function printAll()
+    {
+        return view('song.print', ['songs' => Song::with('artist')->orderBy('name')->get()]);
+    }
+
     public function search(Request $request){
         $request->validate(['search' => 'required|string|max:80']);
         $songs = Song::with('artist')->when(Auth::guest(), fn ($query) => $query->visibleToGuests())
@@ -92,15 +97,7 @@ class SongController extends Controller
             abort_if(Auth::guest() && $song->hidden_from_guests, 404);
             $song->load('artist');
 
-            $lines = [];
-
-            $exploded = preg_split("/\r\n|\n|\r/", $song->text);
-
-            foreach($exploded as $line){
-                $isChord = str_ends_with($line, '_');
-
-                $lines[] = (object)['isChord' => $isChord, 'text' => $isChord?chop($line, '_'):$line];
-            }
+            $lines = $song->lines();
 
             $transposition = Auth::check()
                 ? DB::table('song_transpositions')->where('user_id', Auth::id())->where('song_id', $song->id)->first()

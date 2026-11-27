@@ -23,6 +23,15 @@ class Song extends Model
         return $this->belongsTo(Artist::class);
     }
 
+    public function lines(): array
+    {
+        return array_map(function ($line) {
+            $isChord = str_ends_with($line, '_');
+
+            return (object) ['isChord' => $isChord, 'text' => $isChord ? rtrim($line, '_') : $line];
+        }, preg_split("/\r\n|\n|\r/", $this->text));
+    }
+
     public function chordNotation(): array
     {
         $notation = [];
