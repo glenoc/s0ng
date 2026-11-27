@@ -24,7 +24,9 @@
             @endauth
             @foreach ($artist->songs as $song)
                 <li class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                    <a href="{{ route('song.show', $song->id) }}">{{ $song->name }}</a>
+                    <span><a href="{{ route('song.show', $song->id) }}">{{ $song->name }}</a>
+                        @auth @if ($song->hidden_from_guests) <span class="badge text-bg-secondary">{{ __('ui.song_hidden_from_guests') }}</span> @endif @endauth
+                    </span>
                     @include('song.playability')
                 </li>
             @endforeach

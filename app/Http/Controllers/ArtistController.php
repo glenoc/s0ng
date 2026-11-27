@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Artist;
+use Illuminate\Support\Facades\Auth;
 
 class ArtistController extends Controller
 {
@@ -14,7 +15,8 @@ class ArtistController extends Controller
     */
     public function index()
     {
-        $artists = Artist::has('songs')->withCount('songs')->orderBy('name')->get();
+        $songs = fn ($query) => $query->when(Auth::guest(), fn ($query) => $query->visibleToGuests());
+        $artists = Artist::whereHas('songs', $songs)->withCount(['songs' => $songs])->orderBy('name')->get();
         return view('artists.index', ['artists' => $artists]);
     }
 
@@ -55,7 +57,7 @@ class ArtistController extends Controller
     public function show(Artist $artist)
     {
         //
-        $artist->load('songs');
+        $artist->load(['songs' => fn ($query) => $query->when(Auth::guest(), fn ($query) => $query->visibleToGuests())]);
         return view('artists.show', ['artist' => $artist]);
     }
 

@@ -31,6 +31,7 @@ class SongStartController extends Controller
 
         $starts = SongStart::query()
             ->where('id', '>', $validated['after'] ?? 0)
+            ->when(Auth::guest(), fn ($query) => $query->whereHas('song', fn ($query) => $query->visibleToGuests()))
             ->orderBy('id')
             ->limit(100)
             ->get()
