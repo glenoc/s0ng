@@ -134,7 +134,7 @@
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <button id="autoscroll-toggle" class="btn btn-sm btn-outline-secondary" type="button" aria-pressed="false">{{ __('ui.autoscroll_start') }}</button>
                     <label for="autoscroll-speed">{{ __('ui.autoscroll_speed') }}</label>
-                    <input id="autoscroll-speed" type="range" min="1" max="100" step="1" value="{{ $autoscrollSpeed ?? 20 }}">
+                    <input id="autoscroll-speed" type="range" min="1" max="25" step="1" value="{{ $autoscrollSpeed ?? 8 }}">
                     <output id="autoscroll-speed-value" for="autoscroll-speed"></output>
                     <button id="autoscroll-retry" class="btn btn-sm btn-outline-danger" type="button" hidden>{{ __('ui.autoscroll_retry') }}</button>
                 </div>
